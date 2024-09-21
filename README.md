@@ -1,4 +1,4 @@
-# NutritionPro Chat Application
+# NutritionPro aka "What's For Dinner?" Chat Application
 
 <NEED TO UPDATE>
 
@@ -18,7 +18,7 @@ This Chainlit-based application serves as an AI tutor, leveraging various large 
 ## Prerequisites
 
 - Python 3.7+
-- API keys for OpenAI and/or RunPod (depending on chosen model)
+- API keys for OpenAI (main LLM model) and Langfuse (for tracing and logging)
 
 ## Installation and Setup
 
@@ -41,21 +41,15 @@ This Chainlit-based application serves as an AI tutor, leveraging various large 
 
 ## Configuration
 
-<NEED TO UPDATE>
-
 1. **API Keys**: 
    - Copy the `.env.sample` file and rename it to `.env`
-   - Replace the placeholder values with your actual API keys and Runpod endpoints
-   - Note: Runpod keys are optional
+   - Replace the placeholder values with your actual API keys
 
-2. **Model Selection**:
-   - Choose the desired model by setting the `config_key` variable in `app.py`.
+2. **System Prompts Flag**:
+   - Adjust the `ENABLE_SYSTEM_PROMPT` flag as needed.
 
-3. **System Prompts and Class Context**:
-   - Adjust the `ENABLE_SYSTEM_PROMPT` and `ENABLE_CLASS_CONTEXT` flags as needed.
-
-4. **Customize Prompts**:
-   - Modify the prompt templates in the `prompts.py` file to suit your educational context.
+3. **Customize Prompts**:
+   - Modify the prompt templates in the `prompts.py` file to suit your nutrition coaching context.
 
 ## Running the Application
 
@@ -75,15 +69,15 @@ This Chainlit-based application serves as an AI tutor, leveraging various large 
 
 <NEED TO UPDATE>
 - Start a conversation with the AI tutor by typing a message.
-- The application will process your input, update the student record, and provide a contextual response.
-- Student records are automatically updated and stored in `student_record.md`.
+- The application will process your input, update the user record, and provide a contextual response.
+- User records are automatically updated and stored in `user_record.md`.
 
 ## Key Components
 
 <NEED TO UPDATE>
 - `app.py`: Main application file containing the Chainlit setup and message handling logic.
 - `prompts.py`: Contains prompt templates for system instructions and assessments.
-- `student_record.py`: Handles reading, writing, and formatting of student records.
+- `user_record.py`: Handles reading, writing, and formatting of user records.
 
 ## Contributing
 
