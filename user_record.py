@@ -1,24 +1,28 @@
 import os
-from langsmith.wrappers import wrap_openai
-from langsmith import traceable
+from langfuse.decorators import observe
+from langfuse.openai import openai
 
-@traceable
-def read_lesson_record(file_path):
+@observe()
+def read_user_record(file_path):
     if not os.path.exists(file_path):
         print(f"File {file_path} does not exist. Creating a new file with default content.")
         default_content = """
-# Lessons Record
+# Client Record
 
-## Student Information
-**Name:** Zhang Ling
+## Client Information
+**Name:** Jane Doe
+**Age:** 30
 
 ## Alerts
 _No alerts yet._
 
-## Knowledge
-- **Workplace-related vocabulary:** Not demonstrated
-- **Grammar:** Not demonstrated
-- **Reading Comprehension:** Not demonstrated
+## Meal Preferences
+_No meal preferences yet._
+
+## Chat Records
+- **Nutrition goal:** Not specified
+- **Preferences:** Not specified
+- **Cuisines:** Not specified
 """
         with open(file_path, "w") as file:
             file.write(default_content)
@@ -27,15 +31,15 @@ _No alerts yet._
     with open(file_path, "r") as file:
         return file.read()
 
-@traceable
-def write_lesson_record(file_path, content):
+@observe()
+def write_user_record(file_path, content):
     with open(file_path, "w") as file:
         file.write(content)
 
-@traceable
-def format_lesson_record(student_info, alerts, knowledge):
-    record = "# Lessons Record\n\n## Student Information\n"
-    for key, value in student_info.items():
+@observe()
+def format_user_record(user_info, alerts, meal_preferences, chat_records):
+    record = "# Client Record\n\n## Client Information\n"
+    for key, value in user_info.items():
         record += f"**{key}:** {value}\n"
     
     record += "\n## Alerts\n"
@@ -45,17 +49,25 @@ def format_lesson_record(student_info, alerts, knowledge):
     else:
         record += "_No alerts yet._\n"
     
-    record += "\n## Knowledge\n"
-    for key, value in knowledge.items():
+    record += "\n## Meal Preferences\n"
+    if meal_preferences:
+        for preference in meal_preferences:
+            record += f"- **{preference['date']}:** {preference['note']}\n"
+    else:
+        record += "_No meal preferences yet._\n"
+    
+    record += "\n## Chat Records\n"
+    for key, value in chat_records.items():
         record += f"- **{key}:** {value}\n"
     
     return record
 
-@traceable
-def parse_lesson_record(markdown_content):
-    student_info = {}
+@observe()
+def parse_user_record(markdown_content):
+    user_info = {}
     alerts = []
-    knowledge = {}
+    meal_preferences = []
+    chat_records = {}
     
     current_section = None
     lines = markdown_content.split("\n")
@@ -64,12 +76,12 @@ def parse_lesson_record(markdown_content):
         line = line.strip()  # Strip leading/trailing whitespace
         if line.startswith("## "):
             current_section = line[3:].strip()
-        elif current_section == "Student Information" and line.startswith("**"):
+        elif current_section == "Client Information" and line.startswith("**"):
             if ":** " in line:
                 key, value = line.split(":** ", 1)
                 key = key.strip("**").strip()
                 value = value.strip()
-                student_info[key] = value
+                user_info[key] = value
         elif current_section == "Alerts":
             if "_No alerts yet._" in line:
                 alerts = []
@@ -79,17 +91,27 @@ def parse_lesson_record(markdown_content):
                     date = date.strip("- **").strip()
                     note = note.strip()
                     alerts.append({"date": date, "note": note})
-        elif current_section == "Knowledge" and line.startswith("- **"):
+        elif current_section == "Meal Preferences":
+            if "_No meal preferences yet._" in line:
+                meal_preferences = []
+            elif line.startswith("- **"):
+                if ":** " in line:
+                    date, note = line.split(":** ", 1)
+                    date = date.strip("- **").strip()
+                    note = note.strip()
+                    meal_preferences.append({"date": date, "note": note})
+        elif current_section == "Chat Records" and line.startswith("- **"):
             if ":** " in line:
                 key, value = line.split(":** ", 1)
                 key = key.strip("- **").strip()
                 value = value.strip()
-                knowledge[key] = value
+                chat_records[key] = value
     
     final_record = {
-        "Student Information": student_info,
+        "Client Information": user_info,
         "Alerts": alerts,
-        "Knowledge": knowledge
+        "Meal Preferences": meal_preferences,
+        "Chat Records": chat_records
     }
     print(f"Final parsed record: {final_record}")
     return final_record

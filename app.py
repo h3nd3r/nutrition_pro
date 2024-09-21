@@ -4,38 +4,21 @@ import chainlit as cl
 import openai
 import asyncio
 import json
-from config import MODEL_CONFIGURATIONS
+from config import MODEL_CONFIGURATIONS, CONFIG_KEY
 from datetime import datetime
-from prompts import ASSESSMENT_PROMPT, SYSTEM_PROMPT, CLASS_CONTEXT
-from lessons_record import read_lesson_record, write_lesson_record, format_lesson_record, parse_lesson_record
-from langsmith.wrappers import wrap_openai
-from langsmith import traceable
+from langfuse.decorators import observe
+from langfuse.openai import openai
+from prompts import ASSESSMENT_PROMPT, SYSTEM_PROMPT
+from user_record import read_user_record, write_user_record, format_user_record, parse_user_record
 
 # Load environment variables
 load_dotenv()
 
-configurations = {
-    "mistral_7B_instruct": {
-        "endpoint_url": os.getenv("MISTRAL_7B_INSTRUCT_ENDPOINT"),
-        "api_key": os.getenv("RUNPOD_API_KEY"),
-        "model": "mistralai/Mistral-7B-Instruct-v0.3"
-    },
-    "openai_gpt-4o": {
-        "endpoint_url": os.getenv("OPENAI_ENDPOINT"),
-        "api_key": os.getenv("OPENAI_API_KEY"),
-        "model": "gpt-4o"
-    }
-}
-
-# Choose configuration
-config_key = "openai_gpt-4o"
-# config_key = "mistral_7B_instruct"
-
 # Get selected configuration
-config = configurations[config_key]
+config = MODEL_CONFIGURATIONS[CONFIG_KEY]
 
 # Initialize the OpenAI async client
-client = wrap_openai(openai.AsyncClient(api_key=config["api_key"], base_url=config["endpoint_url"]))
+client = openai.AsyncClient(api_key=config["api_key"], base_url=config["endpoint_url"])
 
 gen_kwargs = {
     "model": config["model"],
@@ -45,9 +28,8 @@ gen_kwargs = {
 
 # Configuration setting to enable or disable the system prompt
 ENABLE_SYSTEM_PROMPT = True
-ENABLE_CLASS_CONTEXT = True
 
-@traceable
+@observe()
 def get_latest_user_message(message_history):
     # Iterate through the message history in reverse to find the last user message
     for message in reversed(message_history):
@@ -55,21 +37,22 @@ def get_latest_user_message(message_history):
             return message['content']
     return None
 
-@traceable
+@observe()
 async def assess_message(message_history):
-    file_path = "lessons_record.md"
-    markdown_content = read_lesson_record(file_path)
-    parsed_record = parse_lesson_record(markdown_content)
+    file_path = "user_record.md"
+    markdown_content = read_user_record(file_path)
+    parsed_record = parse_user_record(markdown_content)
 
     latest_message = get_latest_user_message(message_history)
 
     # Remove the original prompt from the message history for assessment
     filtered_history = [msg for msg in message_history if msg['role'] != 'system']
 
-    # Convert message history, alerts, and knowledge to strings
+    # Convert message history, alerts, meal preferences, and chat records to strings
     history_str = json.dumps(filtered_history, indent=4)
     alerts_str = json.dumps(parsed_record.get("Alerts", []), indent=4)
-    knowledge_str = json.dumps(parsed_record.get("Knowledge", {}), indent=4)
+    meal_preferences_str = json.dumps(parsed_record.get("Meal Preferences", []), indent=4)
+    chat_records_str = json.dumps(parsed_record.get("Chat Records", {}), indent=4)
     
     current_date = datetime.now().strftime('%Y-%m-%d')
 
@@ -78,11 +61,10 @@ async def assess_message(message_history):
         latest_message=latest_message,
         history=history_str,
         existing_alerts=alerts_str,
-        existing_knowledge=knowledge_str,
+        existing_meal_preferences=meal_preferences_str,
+        existing_chat_records=chat_records_str,
         current_date=current_date
-    )
-    if ENABLE_CLASS_CONTEXT:
-        filled_prompt += "\n" + CLASS_CONTEXT
+    )    
     print("Filled prompt: \n\n", filled_prompt)
 
     response = await client.chat.completions.create(messages=[{"role": "system", "content": filled_prompt}], **gen_kwargs)
@@ -91,43 +73,44 @@ async def assess_message(message_history):
     print("Assessment Output: \n\n", assessment_output)
 
     # Parse the assessment output
-    new_alerts, knowledge_updates = parse_assessment_output(assessment_output)
+    new_alerts, new_meal_preferences, chat_records_updates = parse_assessment_output(assessment_output)
 
-    # Update the lessons record with the new alerts and knowledge updates
+    # Update the user record with the new alerts, new meal preferences and chat records updates
     parsed_record["Alerts"].extend(new_alerts)
-    for update in knowledge_updates:
+    parsed_record["Meal Preferences"].extend(new_meal_preferences)
+    for update in chat_records_updates:
         topic = update["topic"]
         note = update["note"]
-        parsed_record["Knowledge"][topic] = note
+        parsed_record["Chat Records"][topic] = note
 
     # Format the updated record and write it back to the file
-    updated_content = format_lesson_record(
-        parsed_record["Student Information"],
+    updated_content = format_user_record(
+        parsed_record["Client Information"],
         parsed_record["Alerts"],
-        parsed_record["Knowledge"]
+        parsed_record["Meal Preferences"],
+        parsed_record["Chat Records"]
     )
-    write_lesson_record(file_path, updated_content)
+    write_user_record(file_path, updated_content)
 
-@traceable
+@observe()
 def parse_assessment_output(output):
     try:
         parsed_output = json.loads(output)
         new_alerts = parsed_output.get("new_alerts", [])
-        knowledge_updates = parsed_output.get("knowledge_updates", [])
-        return new_alerts, knowledge_updates
+        new_meal_preferences = parsed_output.get("meal_preferences_updates", [])
+        chat_records_updates = parsed_output.get("chat_records_updates", [])
+        return new_alerts, new_meal_preferences, chat_records_updates
     except json.JSONDecodeError as e:
         print("Failed to parse assessment output:", e)
-        return [], []
+        return [], [], []
 
-@traceable
+@observe()
 @cl.on_message
 async def on_message(message: cl.Message):
     message_history = cl.user_session.get("message_history", [])
 
     if ENABLE_SYSTEM_PROMPT and (not message_history or message_history[0].get("role") != "system"):
-        system_prompt_content = SYSTEM_PROMPT
-        if ENABLE_CLASS_CONTEXT:
-            system_prompt_content += "\n" + CLASS_CONTEXT
+        system_prompt_content = SYSTEM_PROMPT        
         message_history.insert(0, {"role": "system", "content": system_prompt_content})
 
     message_history.append({"role": "user", "content": message.content})
@@ -142,11 +125,10 @@ async def on_message(message: cl.Message):
         if token := part.choices[0].delta.content or "":
             await response_message.stream_token(token)
 
-# Record the AI's response in the history
+    # Record the AI's response in the history
     message_history.append({"role": "assistant", "content": response_message.content})
     cl.user_session.set("message_history", message_history)
     await response_message.update()
-
 
 if __name__ == "__main__":
     cl.main()
