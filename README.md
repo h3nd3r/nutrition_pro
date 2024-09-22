@@ -1,19 +1,15 @@
 # NutritionPro aka "What's For Dinner?" Chat Application
 
-<NEED TO UPDATE>
-
-This Chainlit-based application serves as an AI tutor, leveraging various large language models (LLMs) to provide interactive learning experiences. It includes features for student assessment, knowledge tracking, and adaptive responses.
+This Chainlit-based application serves as an nutrional assistant, leveraging various large language models (LLMs) to provide support in recommending nutritionous suggestions for what to eat for dinner. It includes features for FRE input, tracking past conversations, and adaptive responses.
 
 ## Features
 
-<NEED TO UPDATE>
-
-- **Multiple Model Support**: Configurable to use different LLMs including OpenAI's GPT-4 and Mistral AI models.
-- **Student Assessment**: Automatically assesses student interactions and updates a student record.
-- **Knowledge Tracking**: Maintains and updates a knowledge base for each student.
-- **Adaptive Responses**: Uses conversation history and student records to provide context-aware responses.
+- **Single Model Support**: Uses OpenAI's GPT-4 model.
+- **User Assessment**: Automatically assesses interactions and updates a record for the user.
+- **Knowledge Tracking**: Maintains and updates a knowledge base for each user.
+- **Adaptive Responses**: Uses conversation history and user records to provide context-aware responses.
 - **Streamed Responses**: Delivers model responses in real-time as they are generated.
-- **Configurable System Prompts**: Allows enabling/disabling of system prompts and class context.
+- **Configurable System Prompts**: Allows enabling/disabling of system prompts and user context.
 
 ## Prerequisites
 
