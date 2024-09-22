@@ -63,17 +63,17 @@ This Chainlit-based application serves as an nutrional assistant, leveraging var
 
 ## Usage
 
-<NEED TO UPDATE>
-- Start a conversation with the AI tutor by typing a message.
-- The application will process your input, update the user record, and provide a contextual response.
+- Start a conversation with a personalized nutrition coach by typing a message.
+- The application will process your input, update your user record, and provide a contextual response.
 - User records are automatically updated and stored in `user_record.md`.
+- If the user completed a new user questionnaire (`user/FRE.pdf`), it will be used to provide context to the LLM.
 
 ## Key Components
 
-<NEED TO UPDATE>
 - `app.py`: Main application file containing the Chainlit setup and message handling logic.
 - `prompts.py`: Contains prompt templates for system instructions and assessments.
 - `user_record.py`: Handles reading, writing, and formatting of user records.
+- `rag_pipeline.py`: Handles the retrieval of user-specific information from a FRE.pdf file.
 
 ## Contributing
 
