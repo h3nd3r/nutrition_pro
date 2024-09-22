@@ -6,16 +6,18 @@ import asyncio
 import json
 from config import MODEL_CONFIGURATIONS, CONFIG_KEY
 from datetime import datetime
-from langfuse.decorators import observe
-from langfuse.openai import openai
+from langfuse import Langfuse
 from prompts import ASSESSMENT_PROMPT, SYSTEM_PROMPT
 from user_record import read_user_record, write_user_record, format_user_record, parse_user_record
+from rag_pipeline import retrieve_user_fre
 
 # Load environment variables
 load_dotenv()
 
 # Get selected configuration
 config = MODEL_CONFIGURATIONS[CONFIG_KEY]
+
+langfuse = Langfuse()
 
 # Initialize the OpenAI async client
 client = openai.AsyncClient(api_key=config["api_key"], base_url=config["endpoint_url"])
@@ -29,7 +31,6 @@ gen_kwargs = {
 # Configuration setting to enable or disable the system prompt
 ENABLE_SYSTEM_PROMPT = True
 
-@observe()
 def get_latest_user_message(message_history):
     # Iterate through the message history in reverse to find the last user message
     for message in reversed(message_history):
@@ -37,7 +38,6 @@ def get_latest_user_message(message_history):
             return message['content']
     return None
 
-@observe()
 async def assess_message(message_history):
     file_path = "user_record.md"
     markdown_content = read_user_record(file_path)
@@ -92,7 +92,6 @@ async def assess_message(message_history):
     )
     write_user_record(file_path, updated_content)
 
-@observe()
 def parse_assessment_output(output):
     try:
         parsed_output = json.loads(output)
@@ -104,13 +103,13 @@ def parse_assessment_output(output):
         print("Failed to parse assessment output:", e)
         return [], [], []
 
-@observe()
 @cl.on_message
 async def on_message(message: cl.Message):
     message_history = cl.user_session.get("message_history", [])
 
     if ENABLE_SYSTEM_PROMPT and (not message_history or message_history[0].get("role") != "system"):
-        system_prompt_content = SYSTEM_PROMPT        
+        user_fre = retrieve_user_fre()
+        system_prompt_content = SYSTEM_PROMPT + "\n" + user_fre  
         message_history.insert(0, {"role": "system", "content": system_prompt_content})
 
     message_history.append({"role": "user", "content": message.content})
