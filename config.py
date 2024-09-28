@@ -5,7 +5,7 @@ MODEL_CONFIGURATIONS = {
     "openai_gpt-4o-mini": {
         "endpoint_url": os.getenv("OPENAI_ENDPOINT"),
         "api_key": os.getenv("OPENAI_API_KEY"),
-        "model": "gpt-4o-mini"
+        "model": "gpt-4o-mini-2024-07-18"
     }
 }
 

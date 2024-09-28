@@ -1,5 +1,4 @@
 from langfuse import Langfuse
-import openai
 from dotenv import load_dotenv
 from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
 
