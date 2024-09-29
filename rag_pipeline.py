@@ -17,5 +17,10 @@ def retrieve_user_fre():
 
     langfuse = Langfuse()
 
-    response = query_engine.query("Please give a comprehensive summary of the information provided in the user's records including the user's goals, preferences, and any other relevant information.")
+    prompt = """
+    Please give a comprehensive summary of the information provided in the user's 
+    records including the user's goals, preferences, and any other relevant information.
+    """
+    response = query_engine.query(prompt)
+    print(f"response.response: {response.response}")
     return response.response
