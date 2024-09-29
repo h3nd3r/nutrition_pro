@@ -71,7 +71,7 @@ def get_grocery_items(location_id, num_items_limit=10):
             items = [item['description'] for item in response_data['data']]
             formatted_items = ", ".join(items)
             print(f"Grocery items: {formatted_items}")
-            return formatted_items
+            return f"Here are some grocery items you might want to buy: {formatted_items}"
         else:
             print(f"Error: No data found in response {response_data}")
             return "No grocery items found in the nearby grocery stores"
