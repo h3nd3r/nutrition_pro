@@ -1,6 +1,9 @@
-# First Run Experience (FRE)
+## Client Information
+**Name:** Jane Doe
+**Age:** 30
+**Zipcode:** unknown
 
-## User Inputs
+## Client Questionnaire
 - **What’s your goal?:** My goal is to eat healthier, more vegetables, get more fiber in my diet.
 - **What staple foods do you already have around?:** Rice, pasta, oil
 - **How much do you weigh?:** 150lbs

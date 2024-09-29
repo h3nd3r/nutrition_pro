@@ -1,6 +1,6 @@
 # NutritionPro aka "What's For Dinner?" Chat Application
 
-This Chainlit-based application serves as an nutrional assistant, leveraging various large language models (LLMs) to provide support in recommending nutritionous suggestions for what to eat for dinner. It includes features for FRE input, tracking past conversations, and adaptive responses.
+This Chainlit-based application serves as an nutrional assistant, leveraging various large language models (LLMs) to provide support in recommending nutritionous suggestions for what to eat for dinner. It includes features uesr_info input, tracking past conversations, and adaptive responses.
 
 ## Features
 
@@ -65,15 +65,15 @@ This Chainlit-based application serves as an nutrional assistant, leveraging var
 
 - Start a conversation with a personalized nutrition coach by typing a message.
 - The application will process your input, update your user record, and provide a contextual response.
-- User records are automatically updated and stored in `user_record.md`.
-- If the user completed a new user questionnaire (`user/FRE.pdf`), it will be used to provide context to the LLM.
+- User records are automatically updated and stored in `user/user_record.md`.
+- If the user completed a new user questionnaire (`user/user_info.md`), it will be used to provide context to the LLM.
 
 ## Key Components
 
 - `app.py`: Main application file containing the Chainlit setup and message handling logic.
 - `prompts.py`: Contains prompt templates for system instructions and assessments.
 - `user_record.py`: Handles reading, writing, and formatting of user records.
-- `rag_pipeline.py`: Handles the retrieval of user-specific information from a FRE.pdf file.
+- `rag_pipeline.py`: Handles the retrieval of user-specific information from a user_info.md file.
 
 ## Contributing
 

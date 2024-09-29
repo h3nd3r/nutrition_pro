@@ -6,10 +6,10 @@ from langfuse.decorators import observe
 from requests.auth import HTTPBasicAuth
 
 # for testing - temp until we have a better way to get location id (ticket #3)
-GROCERY_LOCATION_IDS = {
-    "Bellevue-QFC": "70500822",
-    "Vancouver-FredMeyer": "70100140",
-}
+#GROCERY_LOCATION_IDS = {
+#    "Bellevue-QFC": "70500822",
+#    "Vancouver-FredMeyer": "70100140",
+#}
 
 API_SCOPE = {
     "product": "product.compact"
@@ -79,5 +79,38 @@ def get_grocery_items(location_id, num_items_limit=10):
         print(f"Error: Failed to get grocery items: {e}")
         return "No grocery items found in the nearby grocery stores"
 
+@observe()
+def get_location_id(zipcode):
+
+    try:
+        access_token = get_access_token()
+    except Exception as e:
+        return f"Error: Failed to get access token: {e}, cannot get local store"
+    
+    url = f'https://api.kroger.com/v1/locations'
+    params = {
+        'filter.zipCode.near': zipcode,
+        'filter.limit': '1',
+        'filter.department': '69' # online ordering
+    }
+    headers = {
+        'Accept': 'application/json',
+        'Authorization': f'Bearer {access_token}'
+    }
+
+    response = requests.get(url, params=params, headers=headers)
+    if response.status_code != 200:
+        return f"Error: Failed to location near {zipcode} with code: {response.status_code}"
+
+    try:
+        response_data = response.json()
+        location_ids = [location['locationId'] for location in response_data['data']]
+        return f" The locationId of your nearest store is: {location_ids[0]}"
+
+    except Exception as e:
+        print(f"Error: Failed to get local grocery store with exception {e}")
+        return None
+
 # To test the function, uncomment the following line:
 # print(get_grocery_items(num_items_limit=20, location_id=GROCERY_LOCATION_IDS['Bellevue-QFC']))
+#print(get_location_id(zipcode=98006))

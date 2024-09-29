@@ -10,7 +10,7 @@ from langfuse import Langfuse
 from prompts import ASSESSMENT_PROMPT, SYSTEM_PROMPT
 from user_record import read_user_record, write_user_record, format_user_record, parse_user_record
 from rag_pipeline import retrieve_user_rag_data
-from grocery_functions import get_grocery_items
+from grocery_functions import get_grocery_items, get_location_id
 import re
 
 # Load environment variables
@@ -153,13 +153,18 @@ async def on_message(message: cl.Message):
     response_message = await generate_response(client, message_history, gen_kwargs)
 
     function_call = extract_json(response_message.content)
+    print(f"Extracting function from response: {function_call}")
     while function_call and "function_name" in function_call and "args" in function_call:
         print("in function_call if block")
         function_name = function_call["function_name"]
         args = function_call["args"]
 
         if function_name == "get_grocery_items":
+            print("calling get_grcoery_items")
             result = get_grocery_items(args.get('location_id', ''))
+        elif function_name == "get_location_id":
+            print("calling get_location")
+            result = get_location_id(args.get('zipcode', ''))
         else:
             result = f"Unknown function '{function_name}' cannot be called"
 
