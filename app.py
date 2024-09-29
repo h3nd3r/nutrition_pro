@@ -10,6 +10,8 @@ from langfuse import Langfuse
 from prompts import ASSESSMENT_PROMPT, SYSTEM_PROMPT
 from user_record import read_user_record, write_user_record, format_user_record, parse_user_record
 from rag_pipeline import retrieve_user_fre
+from grocery_functions import get_grocery_items
+import re
 
 # Load environment variables
 load_dotenv()
@@ -103,6 +105,35 @@ def parse_assessment_output(output):
         print("Failed to parse assessment output:", e)
         return [], [], []
 
+def extract_json(content):
+    # Regular expression to find the JSON blob
+    match = re.search(r'\{.*\}', content, re.DOTALL)
+    if match:
+        json_str = match.group(0)  # Extract the matched JSON string
+        try:
+            # Attempt to parse the JSON to ensure it's valid
+            json_data = json.loads(json_str.strip())
+            return json_data  # Return the parsed JSON object
+        except json.JSONDecodeError:
+            print("Error: Extracted string is not valid JSON.")
+            return None  # Return None if JSON is invalid
+    print("No JSON blob found.")
+    return None  # Return None if no match is found
+
+async def generate_response(client, message_history, gen_kwargs):
+    response_message = cl.Message(content="")
+    await response_message.send()
+
+    # Update here to check the response and call the TMDB function if needed
+    stream = await client.chat.completions.create(messages=message_history, stream=True, **gen_kwargs)
+    async for part in stream:
+        if token := part.choices[0].delta.content or "":
+            await response_message.stream_token(token)
+
+    await response_message.update()
+
+    return response_message
+
 @cl.on_message
 async def on_message(message: cl.Message):
     message_history = cl.user_session.get("message_history", [])
@@ -116,18 +147,29 @@ async def on_message(message: cl.Message):
 
     asyncio.create_task(assess_message(message_history))
     
-    response_message = cl.Message(content="")
-    await response_message.send()
+    response_message = await generate_response(client, message_history, gen_kwargs)
 
-    stream = await client.chat.completions.create(messages=message_history, stream=True, **gen_kwargs)
-    async for part in stream:
-        if token := part.choices[0].delta.content or "":
-            await response_message.stream_token(token)
+    function_call = extract_json(response_message.content)
+    while function_call and "function_name" in function_call and "args" in function_call:
+        print("in function_call if block")
+        function_name = function_call["function_name"]
+        args = function_call["args"]
+
+        if function_name == "get_grocery_items":
+            result = get_grocery_items(args.get('location_id', ''))
+        else:
+            result = f"Unknown function '{function_name}' cannot be called"
+
+        # Append the function result to the message history
+        message_history.append({"role": "system", "content": result})
+
+        # Generate a new response incorporating the function results
+        response_message = await generate_response(client, message_history, gen_kwargs)
+        function_call = extract_json(response_message.content)
 
     # Record the AI's response in the history
     message_history.append({"role": "assistant", "content": response_message.content})
     cl.user_session.set("message_history", message_history)
-    await response_message.update()
 
 if __name__ == "__main__":
     cl.main()

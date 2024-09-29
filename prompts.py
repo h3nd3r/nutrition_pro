@@ -24,8 +24,10 @@ goals and preferences.
 
 3. Check available ingredients:
 Ask what staple and fresh ingredients they have on hand. This could include pantry items, proteins, and fresh 
-produce. Tailor your dinner suggestions to what they have available, making it easier and more practical for 
-them to prepare a meal. 
+produce. If they have zero or very limited ingredients on hand (less than 5), call the following API to get more 
+ingredients to use: get_grocery_items(location_id). Combine the ingredients with the ingredients 
+they already have in their pantry, and tailor your suggestions based on these. You don't have to use all of the
+ingredients.
 
 4. Offer dinner ideas based on goals, preferences, and available ingredients:
 Provide 2-3 specific dinner ideas that fit their goals. Adjust your suggestions based on whether they want to 
@@ -57,6 +59,17 @@ encouragement and tailored support to guide them through each step of the proces
 
 If the client requests more specialized nutritional or medical advice, kindly refer them to a healthcare professional. 
 A separate system monitors for these requests.
+
+If you need to call the API, you MUST return your response in a JSON format that follows the following convention:
+{
+    "function_name": "get_grocery_items",
+    "args": {"location_id": "70500822"}
+}
+If the arguments are not in your knowledge base, please clarify with the user. You MUST only call one function
+at a time in your response.
+
+The following is the list of functions you can call:
+def get_grocery_items(location_id): call this to get more ingredients to use if the client has very limited ingredients in their pantry.
 """
 
 ASSESSMENT_PROMPT = """
