@@ -12,6 +12,8 @@ from user_record import read_user_record, write_user_record, format_user_record,
 from rag_pipeline import retrieve_user_rag_data
 from grocery_functions import get_grocery_items, get_location_id
 import re
+from langsmith.wrappers import wrap_openai
+from langsmith import traceable
 
 # Load environment variables
 load_dotenv()
@@ -33,6 +35,7 @@ gen_kwargs = {
 # Configuration setting to enable or disable the system prompt
 ENABLE_SYSTEM_PROMPT = True
 
+@traceable
 def get_latest_user_message(message_history):
     # Iterate through the message history in reverse to find the last user message
     for message in reversed(message_history):
@@ -40,6 +43,7 @@ def get_latest_user_message(message_history):
             return message['content']
     return None
 
+@traceable
 async def assess_message(message_history):
     file_path = "user/user_record.md"
     markdown_content = read_user_record(file_path)
@@ -94,6 +98,7 @@ async def assess_message(message_history):
     )
     write_user_record(file_path, updated_content)
 
+@traceable
 def parse_assessment_output(output):
     try:
         parsed_output = json.loads(output)
@@ -105,6 +110,7 @@ def parse_assessment_output(output):
         print("Failed to parse assessment output:", e)
         return [], [], []
 
+@traceable
 def extract_json(content):
     # Regular expression to find the JSON blob
     match = re.search(r'\{.*\}', content, re.DOTALL)
@@ -120,11 +126,12 @@ def extract_json(content):
     print("No JSON blob found.")
     return None  # Return None if no match is found
 
+@traceable
 async def generate_response(client, message_history, gen_kwargs):
     response_message = cl.Message(content="")
     await response_message.send()
 
-    # Update here to check the response and call the TMDB function if needed
+    # Update here to check the response and call the API functions if needed
     stream = await client.chat.completions.create(messages=message_history, stream=True, **gen_kwargs)
     async for part in stream:
         if token := part.choices[0].delta.content or "":
@@ -134,19 +141,20 @@ async def generate_response(client, message_history, gen_kwargs):
 
     return response_message
 
+@traceable
 @cl.on_message
 async def on_message(message: cl.Message):
+    print("on_message")
     message_history = cl.user_session.get("message_history", [])
 
-    if ENABLE_SYSTEM_PROMPT and (not message_history or message_history[0].get("role") != "system"):
-        message_history.insert(0, {"role": "system", "content": SYSTEM_PROMPT})
+ #   if ENABLE_SYSTEM_PROMPT and (not message_history or message_history[0].get("role") != "system"):
+ #       user_rag_data = retrieve_user_rag_data()
+ #       message_history.insert(0, {"role": "system", "content": SYSTEM_PROMPT + user_rag_data})
 
     message_history.append({"role": "user", "content": message.content})
 
     # ideally, this should be called after assess_message, but I want to make sure that 
     # we avoid the potential race condition of the asyncio.create_task
-    user_rag_data = retrieve_user_rag_data(message.content)
-    message_history.append({"role": "system", "content": user_rag_data})
 
     asyncio.create_task(assess_message(message_history))
 
@@ -178,6 +186,22 @@ async def on_message(message: cl.Message):
     # Record the AI's response in the history
     message_history.append({"role": "assistant", "content": response_message.content})
     cl.user_session.set("message_history", message_history)
+
+@traceable
+@cl.on_chat_start
+async def on_chat_start():
+    print("A new chat session has started!")
+    message_history = cl.user_session.get("message_history", [])
+
+    user_rag_data = retrieve_user_rag_data()
+    message_history.insert(0, {"role": "system", "content": SYSTEM_PROMPT + user_rag_data})
+
+    response_message = await generate_response(client, message_history, gen_kwargs)
+    # Record the AI's response in the history
+    message_history.append({"role": "assistant", "content": response_message.content})
+    cl.user_session.set("message_history", message_history)
+
+    await response_message.send()
 
 if __name__ == "__main__":
     cl.main()

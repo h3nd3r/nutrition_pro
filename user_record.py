@@ -113,5 +113,5 @@ def parse_user_record(markdown_content):
         "Meal Preferences": meal_preferences,
         "Chat Records": chat_records
     }
-    print(f"Final parsed record: {final_record}")
+    #print(f"Final parsed record: {final_record}")
     return final_record

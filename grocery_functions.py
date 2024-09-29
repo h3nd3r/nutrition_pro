@@ -4,17 +4,13 @@ import requests
 from dotenv import load_dotenv
 from langfuse.decorators import observe
 from requests.auth import HTTPBasicAuth
-
-# for testing - temp until we have a better way to get location id (ticket #3)
-#GROCERY_LOCATION_IDS = {
-#    "Bellevue-QFC": "70500822",
-#    "Vancouver-FredMeyer": "70100140",
-#}
+from langsmith import traceable
 
 API_SCOPE = {
     "product": "product.compact"
 }
 
+@traceable
 @observe()
 def get_access_token(scope=None):
     load_dotenv()
@@ -42,6 +38,7 @@ def get_access_token(scope=None):
     except json.JSONDecodeError:
         raise Exception(f"Error: Failed to decode JSON {response.text}")
 
+@traceable
 @observe()
 def get_grocery_items(location_id, num_items_limit=10):
     try:
@@ -79,6 +76,7 @@ def get_grocery_items(location_id, num_items_limit=10):
         print(f"Error: Failed to get grocery items: {e}")
         return "No grocery items found in the nearby grocery stores"
 
+@traceable
 @observe()
 def get_location_id(zipcode):
 
@@ -100,7 +98,7 @@ def get_location_id(zipcode):
 
     response = requests.get(url, params=params, headers=headers)
     if response.status_code != 200:
-        return f"Error: Failed to location near {zipcode} with code: {response.status_code}"
+        return f"Error: Failed to find location near {zipcode} with code: {response.status_code}"
 
     try:
         response_data = response.json()

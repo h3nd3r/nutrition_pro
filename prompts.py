@@ -87,7 +87,9 @@ encouragement and tailored support to guide them through each step of the proces
 A separate system monitors for these requests.
 
 The following is the list of functions you can call:
-def get_grocery_items(location_id): call this to get more ingredients to use if the client has very limited ingredients in their pantry.
+def get_location_id(zipcode): call this with the client's zipcode to obtain the location id of their local grocery store.
+def get_grocery_items(location_id): call with the location id of the client's local grocery store to get more ingredients 
+to use if the client has very limited ingredients in their pantry.
 """
 
 ASSESSMENT_PROMPT = """
