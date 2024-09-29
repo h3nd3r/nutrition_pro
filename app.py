@@ -9,7 +9,7 @@ from datetime import datetime
 from langfuse import Langfuse
 from prompts import ASSESSMENT_PROMPT, SYSTEM_PROMPT
 from user_record import read_user_record, write_user_record, format_user_record, parse_user_record
-from rag_pipeline import retrieve_user_fre
+from rag_pipeline import retrieve_user_rag_data
 from grocery_functions import get_grocery_items
 import re
 
@@ -67,12 +67,12 @@ async def assess_message(message_history):
         existing_chat_records=chat_records_str,
         current_date=current_date
     )    
-    print("Filled prompt: \n\n", filled_prompt)
+    # print("Filled prompt: \n\n", filled_prompt)
 
     response = await client.chat.completions.create(messages=[{"role": "system", "content": filled_prompt}], **gen_kwargs)
 
     assessment_output = response.choices[0].message.content.strip()
-    print("Assessment Output: \n\n", assessment_output)
+    # print("Assessment Output: \n\n", assessment_output)
 
     # Parse the assessment output
     new_alerts, new_meal_preferences, chat_records_updates = parse_assessment_output(assessment_output)
@@ -139,14 +139,17 @@ async def on_message(message: cl.Message):
     message_history = cl.user_session.get("message_history", [])
 
     if ENABLE_SYSTEM_PROMPT and (not message_history or message_history[0].get("role") != "system"):
-        user_fre = retrieve_user_fre()
-        system_prompt_content = SYSTEM_PROMPT + "\n" + user_fre  
-        message_history.insert(0, {"role": "system", "content": system_prompt_content})
+        message_history.insert(0, {"role": "system", "content": SYSTEM_PROMPT})
 
     message_history.append({"role": "user", "content": message.content})
 
+    # ideally, this should be called after assess_message, but I want to make sure that 
+    # we avoid the potential race condition of the asyncio.create_task
+    user_rag_data = retrieve_user_rag_data(message.content)
+    message_history.append({"role": "system", "content": user_rag_data})
+
     asyncio.create_task(assess_message(message_history))
-    
+
     response_message = await generate_response(client, message_history, gen_kwargs)
 
     function_call = extract_json(response_message.content)

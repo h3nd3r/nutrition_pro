@@ -1,12 +1,18 @@
 from langfuse import Langfuse
+from langfuse.llama_index import LlamaIndexCallbackHandler
+from langfuse.openai import openai
 from dotenv import load_dotenv
 from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
+from llama_index.core import Settings
+from llama_index.core.callbacks import CallbackManager
 
-def retrieve_user_fre():
+def retrieve_user_rag_data(query_str):
     load_dotenv()
 
+    langfuse_callback_handler = LlamaIndexCallbackHandler()
+    Settings.callback_manager = CallbackManager([langfuse_callback_handler])
+
     # Load documents from a directory
-    # Note, when I moved the user_record.md file to the user folder, the query engine would only create responses from one document or the other, but never a combination from both.
     documents = SimpleDirectoryReader("user").load_data()
 
     # Create an index from the documents
@@ -15,12 +21,10 @@ def retrieve_user_fre():
     # Create a query engine
     query_engine = index.as_query_engine()
 
-    langfuse = Langfuse()
-
-    prompt = """
-    Please give a comprehensive summary of the information provided in the user's 
-    records including the user's goals, preferences, and any other relevant information.
-    """
-    response = query_engine.query(prompt)
+    response = query_engine.query(query_str)
     print(f"response.response: {response.response}")
-    return response.response
+    formatted_response = f"""
+    CONTEXT: This is the user's information as provided by the RAG pipeline: {response.response}. 
+    You should use this information to answer the user's query.
+    """
+    return formatted_response
