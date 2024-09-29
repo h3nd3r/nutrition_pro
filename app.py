@@ -24,7 +24,8 @@ config = MODEL_CONFIGURATIONS[CONFIG_KEY]
 langfuse = Langfuse()
 
 # Initialize the OpenAI async client
-client = openai.AsyncClient(api_key=config["api_key"], base_url=config["endpoint_url"])
+#client = openai.AsyncClient(api_key=config["api_key"], base_url=config["endpoint_url"])
+client = wrap_openai(openai.AsyncClient(api_key=config["api_key"], base_url=config["endpoint_url"]))
 
 gen_kwargs = {
     "model": config["model"],
@@ -146,11 +147,6 @@ async def generate_response(client, message_history, gen_kwargs):
 async def on_message(message: cl.Message):
     print("on_message")
     message_history = cl.user_session.get("message_history", [])
-
- #   if ENABLE_SYSTEM_PROMPT and (not message_history or message_history[0].get("role") != "system"):
- #       user_rag_data = retrieve_user_rag_data()
- #       message_history.insert(0, {"role": "system", "content": SYSTEM_PROMPT + user_rag_data})
-
     message_history.append({"role": "user", "content": message.content})
 
     # ideally, this should be called after assess_message, but I want to make sure that 
@@ -197,6 +193,7 @@ async def on_chat_start():
     message_history.insert(0, {"role": "system", "content": SYSTEM_PROMPT + user_rag_data})
 
     response_message = await generate_response(client, message_history, gen_kwargs)
+
     # Record the AI's response in the history
     message_history.append({"role": "assistant", "content": response_message.content})
     cl.user_session.set("message_history", message_history)

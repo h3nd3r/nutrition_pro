@@ -1,7 +1,7 @@
 # Client Record
 
 ## Client Information
-**Name:** Jane Doe
+**Name:** John Doe
 **Age:** 30
 
 ## Alerts
@@ -10,7 +10,7 @@
 - **2024-09-29:** Client is out of the suggested ingredients and is looking for alternative meal suggestions.
 - **2024-09-29:** Client doesn't like the meal suggestions and would not like to make it again.
 - **2024-09-29:** Client is looking for alternative ingredients for their meals and would like new suggestions.
-- **2024-09-29:** Client is looking for alternative meal suggestions to incorporate apples into their meals.
+- **2024-09-29:** Client is looking for alternative meal suggestions to incorporate more protein into their meals.
 
 ## Meal Preferences
 - **2024-09-28:** Client is interested in Chinese food for dinner.
@@ -44,8 +44,18 @@
 - **2024-09-29:** Client has limited ingredients available and is looking for meal suggestions based on turkey and oatmeal.
 - **2024-09-29:** Client has limited ingredients available and is looking for meal suggestions based on pasta.
 - **2024-09-29:** Client prefers high fat, low carb meals.
+- **2024-09-29:** Client has heavy cream and may be interested in recipes that incorporate it.
+- **2024-09-29:** Client would like to incorporate shrimp into their meals for protein.
+- **2024-09-29:** Client has pasta and beef sirloin available and may be interested in recipes that incorporate these ingredients.
+- **2024-09-29:** Client is interested in adding more vegetables to their meals.
+- **2024-09-29:** Client is interested in adding more vegetables to their meals.
+- **2024-09-29:** Client is looking for more variety in their meals.
+- **2024-09-29:** Client is interested in Indian cuisine and would like to see recipes inspired by it.
+- **2024-09-29:** Client has chicken thighs available and may be interested in recipes that incorporate them.
+- **2024-09-29:** Client does not like iceberg lettuce and would like to skip it in future meal suggestions.
 
 ## Chat Records
 - **Nutrition goal:** 2024-09-29. Client would like to lose weight.
-- **Preferences:** 2024-09-29. Client has limited ingredients on hand and is looking for meal suggestions based on what they have available.
-- **Cuisines:** 2024-09-29. Client is requesting a recipe for dinner.
+- **Preferences:** 2024-09-29. Client is looking for meal suggestions that utilize heavy cream.
+- **Cuisines:** 2024-09-29. Client is interested in the Baked Chicken Thighs with Roasted Vegetables recipe.
+- **Available Ingredients:** 2024-09-29. Client has pasta and beef sirloin available and is interested in incorporating vegetables into their meals.
