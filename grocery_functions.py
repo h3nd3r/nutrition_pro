@@ -38,13 +38,14 @@ def get_access_token(scope=None):
     except json.JSONDecodeError:
         raise Exception(f"Error: Failed to decode JSON {response.text}")
 
+
 @traceable
 @observe()
-def get_grocery_items(location_id, num_items_limit=10):
+def get_grocery_items_request(location_id, num_items_limit):
     try:
         access_token = get_access_token(scope=API_SCOPE['product'])
     except Exception as e:
-        return f"Error: Failed to get access token: {e}, cannot get grocery items"
+        raise Exception(f"Error: Failed to get access token: {e}, cannot get grocery items")
     
     url = f'https://api.kroger.com/v1/products'
     params = {
@@ -60,21 +61,61 @@ def get_grocery_items(location_id, num_items_limit=10):
 
     response = requests.get(url, params=params, headers=headers)
     if response.status_code != 200:
-        return f"Error: Failed to get grocery items: {response.status_code}"
+        raise Exception(f"Error: Failed to get grocery items: {response.status_code}")
 
     try:
         response_data = response.json()
         if 'data' in response_data:
-            items = [item['description'] for item in response_data['data']]
-            formatted_items = ", ".join(items)
-            print(f"Grocery items: {formatted_items}")
-            return f"Here are some grocery items you might want to buy: {formatted_items}"
+            return response_data['data']
         else:
-            print(f"Error: No data found in response {response_data}")
-            return "No grocery items found in the nearby grocery stores"
+            raise Exception(f"Error: No 'data' found in grocery response {response_data}")
+    except Exception as e:
+        raise Exception(f"Error: Failed to get grocery items: {e}")
+
+@traceable
+@observe()
+def get_grocery_items(location_id, num_items_limit=10):
+    try:
+        data = get_grocery_items_request(location_id, num_items_limit)
+        items = [item['description'] for item in data]
+        formatted_items = ", ".join(items)
+        print(f"Grocery items: {formatted_items}")
+        return f"Here are some grocery items you might want to buy: {formatted_items}"
     except Exception as e:
         print(f"Error: Failed to get grocery items: {e}")
-        return "No grocery items found in the nearby grocery stores"
+        return "Failed to get grocery items in the nearby grocery stores"
+
+
+@traceable
+@observe()
+# 50 is the max number of items that can be returned by the API unless we paginate
+def get_grocery_items_on_promotion(location_id, num_items_limit=50):
+    try:
+        data = get_grocery_items_request(location_id, num_items_limit)
+
+        promoted_items = []
+        for product in data:
+            if 'items' in product and product['items']:
+                item = product['items'][0]
+                if 'price' in item:
+                    regular_price = item['price'].get('regular', 0)
+                    promo_price = item['price'].get('promo', 0)
+                    if promo_price and promo_price != 0 and promo_price < regular_price: # if there's no promo, promo_price will be 0
+                        promoted_items.append({
+                            'description': product['description'],
+                            'regular_price': regular_price,
+                            'promo_price': promo_price
+                        })
+
+        if promoted_items:
+            formatted_items = ", ".join([f"{item['description']} (Regular: ${item['regular_price']:.2f}, Promo: ${item['promo_price']:.2f})" for item in promoted_items])
+            print(f"Grocery items on promotion: {formatted_items}")
+            return f"Here are some grocery items on promotion: {formatted_items}"
+        else:
+            return "No grocery items on promotion found in the nearby grocery stores"
+    except Exception as e:
+        print(f"Error: Failed to get grocery items on promotion: {e}")
+        return "Failed to get grocery items on promotion in the nearby grocery stores"
 
 @traceable
 @observe()
@@ -110,5 +151,5 @@ def get_location_id(zipcode):
         return None
 
 # To test the function, uncomment the following line:
-# print(get_grocery_items(num_items_limit=20, location_id=GROCERY_LOCATION_IDS['Bellevue-QFC']))
+# get_grocery_items_on_promotion(num_items_limit=50, location_id=70100140)
 #print(get_location_id(zipcode=98006))
