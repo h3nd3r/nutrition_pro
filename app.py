@@ -11,7 +11,7 @@ from langfuse import Langfuse
 from prompts import ASSESSMENT_PROMPT, SYSTEM_PROMPT
 from user_record import read_user_record, write_user_record, format_user_record, parse_user_record
 from rag_pipeline import retrieve_user_rag_data
-from grocery_functions import get_grocery_items, get_location_id
+from grocery_functions import get_grocery_items, get_location_id, get_grocery_items_on_promotion
 import re
 from langsmith.wrappers import wrap_openai
 from langsmith import traceable
@@ -188,8 +188,11 @@ async def on_message(message: cl.Message):
         args = function_call["args"]
 
         if function_name == "get_grocery_items":
-            print("calling get_grcoery_items")
+            print("calling get_grocery_items")
             result = get_grocery_items(args.get('location_id', ''))
+        elif function_name == "get_grocery_items_on_promotion":
+            print("calling get_grocery_items_on_promotion")
+            result = get_grocery_items_on_promotion(args.get('location_id', ''))
         elif function_name == "get_location_id":
             print("calling get_location")
             result = get_location_id(args.get('zipcode', ''))
