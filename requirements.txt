@@ -32,6 +32,11 @@ idna==3.10
 importlib_metadata==8.4.0
 jiter==0.5.0
 joblib==1.4.2
+jsonpatch==1.33
+jsonpointer==3.0.0
+langchain==0.3.1
+langchain-core==0.3.7
+langchain-text-splitters==0.3.0
 langfuse==2.50.2
 langsmith==0.1.129
 Lazify==0.4.0
@@ -57,6 +62,7 @@ mypy-extensions==1.0.0
 nest-asyncio==1.6.0
 networkx==3.3
 nltk==3.9.1
+notion-client==2.2.1
 numpy==1.26.4
 oauthlib==3.2.2
 openai==1.46.1

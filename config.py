@@ -15,4 +15,4 @@ MODEL_CONFIGURATIONS = {
 }
 
 # Choose configuration
-CONFIG_KEY = "openai_gpt-4o"
+CONFIG_KEY = "openai_gpt-4o-mini"
