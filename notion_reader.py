@@ -1,6 +1,8 @@
 import os
 from dotenv import load_dotenv
 from notion_client import Client
+from typing import List
+from llama_index.core.schema import Document
 import random
 
 load_dotenv()
@@ -63,6 +65,28 @@ def retrieve_random_page_content():
         print(f"DEBUG: Error in retrieve_random_page_content: {e}")
         return f"Error: Failed to retrieve content for a random page."
 
+# Load pages from the workspace into a list[Document]
+# TODO: implement max_pages and pagination
+def load_pages() -> List[Document]:
+    try:
+        children_page_ids = retrieve_children_page_ids()
+
+        if not children_page_ids:
+            print("DEBUG: No child pages found.")
+            return []
+        
+        pages = []
+        for page in children_page_ids:
+            page_content = retrieve_page_content(page.get("page_id", ''))
+            if page_content:
+                pages.append(Document(text=page_content, metadata={"page_id": page.get("page_id", ''), "title": page.get("title", '')}))
+
+        # print(f"DEBUG: pages: {pages}")
+        return pages
+    except Exception as e:
+        print(f"DEBUG: Error in load_pages: {e}")
+        return []
+
 # Retrieve page content associated with the page_id
 def retrieve_page_content(page_id):
     block_id = page_id # The page_id is also the id of the page's root block
@@ -100,7 +124,7 @@ def retrieve_page_content(page_id):
                 # there are other block types, but we don't need them for this mvp
                 print(f"DEBUG: Unsupported block type: {block_type}")
 
-        print(f"DEBUG: formatted_content: {formatted_content}")
+        # print(f"DEBUG: formatted_content: {formatted_content}")
         return formatted_content
     except Exception as e:
         print(f"Error: Failed to retrieve page content: {e}")
@@ -110,3 +134,4 @@ def retrieve_page_content(page_id):
 # To test the function, uncomment the following line:
 # retrieve_page_content("117082cd-fa9d-80e3-8173-e54a018de451")
 # retrieve_random_page_content()
+# load_pages()

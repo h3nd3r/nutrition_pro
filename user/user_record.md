@@ -59,7 +59,7 @@
 - **2024-10-05:** Client likes yellow peaches and would like to incorporate them into their meals.
 
 ## Chat Records
-- **Nutrition goal:** 2024-09-29. Client would like to lose weight.
+- **Nutrition goal:** 2024-10-07. Client is inquiring about protein content in their meals.
 - **Preferences:** 2024-09-29. Client is looking for meal suggestions that utilize heavy cream.
 - **Cuisines:** 2024-09-29. Client is interested in the Baked Chicken Thighs with Roasted Vegetables recipe.
 - **Available Ingredients:** 2024-09-29. Client has pasta and beef sirloin available and is interested in incorporating vegetables into their meals.
