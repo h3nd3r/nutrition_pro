@@ -83,6 +83,13 @@ or
     "args": {"zipcode": zipcode}
 }
 
+or
+
+{
+    "function_name": "get_random_favorite_recipe",
+    "args": {}
+}
+
 To get the location_id of the store you must call the get_location API with the users zipcode.
 
 If the arguments are not in your knowledge base, you need to clarify it with the user. 
@@ -99,6 +106,7 @@ The following is the list of functions you can call:
 to use if the client has very limited ingredients in their pantry.
 - get_grocery_items_on_promotion(location_id): call with the location id of the client's local grocery store to get
 grocery items on promotion.
+- get_random_favorite_recipe(): call this to get a random favorite recipe from the client's Notion workspace.
 """
 
 ASSESSMENT_PROMPT = """

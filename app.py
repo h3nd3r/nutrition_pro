@@ -15,7 +15,7 @@ from grocery_functions import get_grocery_items, get_location_id, get_grocery_it
 import re
 from langsmith.wrappers import wrap_openai
 from langsmith import traceable
-
+from notion_reader import retrieve_random_page_content
 # Load environment variables
 load_dotenv()
 
@@ -196,6 +196,9 @@ async def on_message(message: cl.Message):
         elif function_name == "get_location_id":
             print("calling get_location")
             result = get_location_id(args.get('zipcode', ''))
+        elif function_name == "get_random_favorite_recipe":
+            print("calling get_random_favorite_recipe")
+            result = retrieve_random_page_content()
         else:
             result = f"Unknown function '{function_name}' cannot be called"
 
