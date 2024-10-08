@@ -10,7 +10,7 @@ from datetime import datetime
 from langfuse import Langfuse
 from prompts import ASSESSMENT_PROMPT, SYSTEM_PROMPT
 from user_record import read_user_record, write_user_record, format_user_record, parse_user_record
-from rag_pipeline import retrieve_user_rag_data
+from rag_pipeline import RAGPipeline
 from functions.grocery_functions import get_grocery_items, get_location_id, get_grocery_items_on_promotion
 from functions.scraper_functions import traderjoes_items
 from functions.notion_reader import retrieve_random_page_content
@@ -28,6 +28,7 @@ langfuse = Langfuse()
 # Initialize the OpenAI async client
 #client = openai.AsyncClient(api_key=config["api_key"], base_url=config["endpoint_url"])
 client = wrap_openai(openai.AsyncClient(api_key=config["api_key"], base_url=config["endpoint_url"]))
+rag_pipeline = RAGPipeline()
 
 gen_kwargs = {
     "model": config["model"],
@@ -203,6 +204,9 @@ async def on_message(message: cl.Message):
         elif function_name == "traderjoes_items":
             print("calling traderjoes_items")
             result = traderjoes_items()
+        elif function_name == "get_favorite_recipes":
+            print("calling get_favorite_recipes")
+            result = rag_pipeline.query_user_favorite_recipes(message_history)
         else:
             result = f"Unknown function '{function_name}' cannot be called"
 
@@ -223,8 +227,10 @@ async def on_chat_start():
     print("A new chat session has started!")
     message_history = cl.user_session.get("message_history", [])
 
-    user_rag_data = retrieve_user_rag_data()
+    user_rag_data = rag_pipeline.retrieve_user_rag_data()
     message_history.insert(0, {"role": "system", "content": SYSTEM_PROMPT + user_rag_data})
+
+    rag_pipeline.index_user_favorite_recipes()
 
     response_message = await generate_response(client, message_history, gen_kwargs)
 

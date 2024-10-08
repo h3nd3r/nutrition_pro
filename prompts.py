@@ -110,6 +110,13 @@ or
     "args": {}
 }
 
+or 
+
+{
+    "function_name": "get_favorite_recipes",
+    "args": {"message_history": message_history}
+}
+
 To get the location_id of the store you must call the get_location API with the users zipcode.
 
 If the arguments are not in your knowledge base, you need to clarify it with the user. 
@@ -127,6 +134,7 @@ to use if the client has very limited ingredients in their pantry.
 - get_grocery_items_on_promotion(location_id): call with the location id of the client's local grocery store to get
 grocery items on promotion.
 - get_random_favorite_recipe(): call this to get a random favorite recipe from the client's Notion workspace.
+- get_favorite_recipes(message_history): given the message history, suggest one or more favorite recipes that the user may want to consider.
 - traderjoes_items(): call this to get a list of items from trader joes.
 """
 
