@@ -1,5 +1,6 @@
 from playwright.sync_api import sync_playwright
 import time
+import json
 import pdb
 
 def scrape_react_page(url):
@@ -34,11 +35,15 @@ def scrape_react_page(url):
         for element in elements:
             title = element.query_selector('.Link_link__1AZfr').inner_text()
             link = "https://www.traderjoes.com" + element.query_selector('.Link_link__1AZfr').get_attribute('href')
-            data.append({'title': title, 'link': link})
+            data.append({"title": title, "link": link})
         browser.close()
-        return data
+        json_array = json.dumps(data)
+        return json_array
 
 # Usage
 url = "https://www.traderjoes.com/home/products/category/food-8"
 scraped_data = scrape_react_page(url)
-print(scraped_data)
+
+with open('data/traderjoes_items.json', 'w', encoding='utf-8') as json_file:
+    json.dump(scraped_data, json_file, ensure_ascii=False, indent=4)  # indent for pretty printing
+#print(scraped_data)

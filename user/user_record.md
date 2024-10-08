@@ -57,6 +57,9 @@
 - **2024-10-05:** Client has rice, pasta, and oil available and may be interested in recipes that incorporate these ingredients.
 - **2024-10-05:** Client likes raspberries and pineapple and would like to incorporate them into their meals.
 - **2024-10-05:** Client likes yellow peaches and would like to incorporate them into their meals.
+- **2024-10-08:** Client prefers to get ingredients from Trader Joe's.
+- **2024-10-08:** Client prefers to get ingredients from Trader Joe's.
+- **2024-10-08:** Client prefers to get ingredients only from Trader Joe's.
 
 ## Chat Records
 - **Nutrition goal:** 2024-09-29. Client would like to lose weight.

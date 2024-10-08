@@ -26,6 +26,9 @@ Ask what staple and fresh ingredients they have on hand. This could include pant
 produce. If they have zero or very limited ingredients on hand (less than 5), AND/OR if the user specified that they
 want more diversity in their ingredients, call the following API to get more ingredients to use: get_grocery_items(location_id).
 
+If the user asks you to use ingredients from Trader Joes, call the following
+API: traderjoes_items().
+
 If you don't know their zipcode, ask them for it before calling the get_grocery_items(location_id) API and call the following
 API to obtain the location_id of their nearest store: get_location_id(zipcode).
 
@@ -82,11 +85,17 @@ or
     "function_name": "get_location_id",
     "args": {"zipcode": zipcode}
 }
-
 or
 
 {
     "function_name": "get_random_favorite_recipe",
+    "args": {}
+}
+
+or
+
+{
+    "function_name": "traderjoes_items",
     "args": {}
 }
 
@@ -107,6 +116,7 @@ to use if the client has very limited ingredients in their pantry.
 - get_grocery_items_on_promotion(location_id): call with the location id of the client's local grocery store to get
 grocery items on promotion.
 - get_random_favorite_recipe(): call this to get a random favorite recipe from the client's Notion workspace.
+- traderjoes_items(): call this to get a list of items from trader joes.
 """
 
 ASSESSMENT_PROMPT = """

@@ -11,7 +11,8 @@ from langfuse import Langfuse
 from prompts import ASSESSMENT_PROMPT, SYSTEM_PROMPT
 from user_record import read_user_record, write_user_record, format_user_record, parse_user_record
 from rag_pipeline import retrieve_user_rag_data
-from grocery_functions import get_grocery_items, get_location_id, get_grocery_items_on_promotion
+from functions.grocery_functions import get_grocery_items, get_location_id, get_grocery_items_on_promotion
+from functions.scraper_functions import traderjoes_items
 import re
 from langsmith.wrappers import wrap_openai
 from langsmith import traceable
@@ -199,6 +200,9 @@ async def on_message(message: cl.Message):
         elif function_name == "get_random_favorite_recipe":
             print("calling get_random_favorite_recipe")
             result = retrieve_random_page_content()
+        elif function_name == "traderjoes_items":
+            print("calling traderjoes_items")
+            result = traderjoes_items()
         else:
             result = f"Unknown function '{function_name}' cannot be called"
 
