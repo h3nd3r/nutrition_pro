@@ -13,10 +13,10 @@ from user_record import read_user_record, write_user_record, format_user_record,
 from rag_pipeline import retrieve_user_rag_data
 from functions.grocery_functions import get_grocery_items, get_location_id, get_grocery_items_on_promotion
 from functions.scraper_functions import traderjoes_items
+from functions.notion_reader import retrieve_random_page_content
 import re
 from langsmith.wrappers import wrap_openai
 from langsmith import traceable
-from notion_reader import retrieve_random_page_content
 # Load environment variables
 load_dotenv()
 

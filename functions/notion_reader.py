@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from notion_client import Client
 import random
-
+import pdb
 load_dotenv()
 
 notion = Client(auth=os.getenv("NOTION_API_KEY"))
@@ -108,5 +108,5 @@ def retrieve_page_content(page_id):
 
 
 # To test the function, uncomment the following line:
-# retrieve_page_content("117082cd-fa9d-80e3-8173-e54a018de451")
-# retrieve_random_page_content()
+#retrieve_page_content("117082cd-fa9d-80e3-8173-e54a018de451")
+retrieve_random_page_content()
