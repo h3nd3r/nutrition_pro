@@ -1,15 +1,10 @@
-# from langfuse import Langfuse
-# from langfuse.llama_index import LlamaIndexCallbackHandler
-# from langfuse.openai import openai
+from langfuse import Langfuse
+from langfuse.llama_index import LlamaIndexCallbackHandler
 from dotenv import load_dotenv
 from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
 from llama_index.core import Settings
 from llama_index.core.callbacks import CallbackManager
-
-from langchain.callbacks import LangChainTracer
-from langchain.callbacks.manager import CallbackManager as LangChainCallbackManager
-from llama_index.core.callbacks import CallbackManager as LlamaIndexCallbackManager
-from notion_reader import load_pages
+from functions.notion_reader import load_pages
 
 load_dotenv()
 
@@ -18,22 +13,10 @@ class RAGPipeline:
     recipes_index = None
 
     def __init__(self):
-        # Set up LangChain tracer
-        self.tracer = LangChainTracer()
-        langchain_callback_manager = LangChainCallbackManager([self.tracer])
-        
-        # Set up LlamaIndex callback manager with LangChain tracer
-        self.callback_manager = CallbackManager([self.tracer])
-        
-        # Update the global Settings for LlamaIndex
-        Settings.callback_manager = self.callback_manager
+        langfuse_callback_handler = LlamaIndexCallbackHandler()
+        Settings.callback_manager = CallbackManager([langfuse_callback_handler])
 
     def retrieve_user_rag_data(self):
-        # load_dotenv()
-
-        # langfuse_callback_handler = LlamaIndexCallbackHandler()
-        # Settings.callback_manager = CallbackManager([langfuse_callback_handler])
-
         # Load documents from a directory
         documents = SimpleDirectoryReader("user").load_data()
 
@@ -79,9 +62,9 @@ class RAGPipeline:
         # Create a query engine
         query_engine = self.recipes_index.as_query_engine()
 
-        query_str = """
-            Given the message history, provide one or more favorite recipes that the user may want to consider.
-            The message history is: {message_history}
+        query_str = f"""
+        Given the message history, provide one or more favorite recipes that the user may want to consider.
+        The message history is: {message_history}
         """
 
         response = query_engine.query(query_str)
