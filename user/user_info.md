@@ -1,7 +1,7 @@
 ## Client Information
-**Name:** John Doe
+**Name:** Johnny Danger
 **Age:** 30
-**Zipcode:** 92104
+**Zipcode:** 92105
 
 ## Client Questionnaire
 - **What’s your goal?:** My goal is to eat healthier, more vegetables, get more fiber in my diet.
