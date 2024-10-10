@@ -57,7 +57,7 @@ TOOLS = [
         "type": "function",
         "function": {
             "name": "get_random_favorite_recipe",
-            "description": "Call this to get a random favorite recipe from the client's Notion workspace.",
+            "description": "Call this if user asks to get a random favorite recipe from the client's Notion workspace, or to surprise them with a recipe.",
             "parameters": {
                 "type": "object",
                 "properties": {},
@@ -70,7 +70,7 @@ TOOLS = [
         "type": "function",
         "function": {
             "name": "get_favorite_recipes_from_message_history",
-            "description": "Get a list of favorite recipes from the client's Notion workspace using the message history as context.",
+            "description": "Call this if user asks to get a list of favorite recipes from the client's Notion workspace using the message history as context.",
             "parameters": {
                 "type": "object",
                 "properties": {},

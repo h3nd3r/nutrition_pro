@@ -205,51 +205,73 @@ async def on_message(message: cl.Message):
                     }
                 }
             ]
-        })
-
-    # ideally, this should be called after assess_message, but I want to make sure that 
-    # we avoid the potential race condition of the asyncio.create_task
+        })    
 
     asyncio.create_task(assess_message(message_history))
 
     response_message, functions_called = await generate_response(client, message_history, gen_kwargs)
 
-    print("Functions called in on_message: ", functions_called)
+    #function_call = extract_json(response_message.content)
+    #print(f"Extracting function from response: {function_call}")
+    # while function_call and "function_name" in function_call and "args" in function_call:
 
-    function_call = extract_json(response_message.content)
-    print(f"Extracting function from response: {function_call}")
-    while function_call and "function_name" in function_call and "args" in function_call:
-        print("in function_call if block")
-        function_name = function_call["function_name"]
-        args = function_call["args"]
+    while functions_called: # handle one function call after another without new user message
+        for _, tool_call_info in functions_called.items(): # handle multiple functions being returned in tool_calls
+            function_name = tool_call_info.get("function_name", "")
+            args = tool_call_info.get("arguments", "")
 
-        if function_name == "get_grocery_items":
-            print("calling get_grocery_items")
-            result = get_grocery_items(args.get('location_id', ''))
-        elif function_name == "get_grocery_items_on_promotion":
-            print("calling get_grocery_items_on_promotion")
-            result = get_grocery_items_on_promotion(args.get('location_id', ''))
-        elif function_name == "get_location_id":
-            print("calling get_location")
-            result = get_location_id(args.get('zipcode', ''))
-        elif function_name == "get_random_favorite_recipe":
-            print("calling get_random_favorite_recipe")
-            result = retrieve_random_page_content()
-        elif function_name == "traderjoes_items":
-            print("calling traderjoes_items")
-            result = traderjoes_items()
-        elif function_name == "get_favorite_recipes_from_message_history":
-            print("calling get_favorite_recipes_from_message_history")
-            result = rag_pipeline.query_user_favorite_recipes(message_history)
-        else:
-            result = f"Unknown function '{function_name}' cannot be called"
+            print("in function_call if block")
+            # function_name = function_call["function_name"]
+            # args = function_call["args"]
 
-        # Append the function result to the message history
-        message_history.append({"role": "system", "content": result})
+            if function_name == "get_grocery_items":
+                print("calling get_grocery_items")
+                args_dict = json.loads(args)
+                location_id = args_dict.get('location_id', '')
 
-        # Generate a new response incorporating the function results
-        response_message, functions_called = await generate_response(client, message_history, gen_kwargs)
-        function_call = extract_json(response_message.content)
+                print("DEBUG: location_id: ", location_id)
+
+                result = get_grocery_items(location_id)
+            elif function_name == "get_grocery_items_on_promotion":
+                print("calling get_grocery_items_on_promotion")
+                args_dict = json.loads(args)
+                location_id = args_dict.get('location_id', '')
+                
+                print("DEBUG: location_id: ", location_id)
+                
+                result = get_grocery_items_on_promotion(location_id)
+            elif function_name == "get_location_id":
+                print("calling get_location")
+                args_dict = json.loads(args)
+                zipcode = args_dict.get('zipcode', '')
+                
+                print("DEBUG: zipcode: ", zipcode)
+                
+                result = get_location_id(zipcode)
+            elif function_name == "get_random_favorite_recipe":
+                print("calling get_random_favorite_recipe")
+                result = retrieve_random_page_content()
+            elif function_name == "traderjoes_items":
+                print("calling traderjoes_items")
+                result = traderjoes_items()
+            elif function_name == "get_favorite_recipes_from_message_history":
+                print("calling get_favorite_recipes_from_message_history")
+                #print("DEBUG: message_history in function call: ", message_history)
+                result = rag_pipeline.query_user_favorite_recipes(message_history)
+            else:
+                result = f"Unknown function '{function_name}' cannot be called"
+
+            # Append function call to the message history
+            message_history.append({"role": "assistant", "content": f"Function call: {function_name}({args})"})
+
+            # Append the function result to the message history
+            message_history.append({"role": "system", "content": result})
+
+            # Generate a new response incorporating the function results
+            response_message, functions_called = await generate_response(client, message_history, gen_kwargs)
+            # should we update message history with response message here?
+
+            # function_call = extract_json(response_message.content)
 
     # Record the AI's response in the history
     message_history.append({"role": "assistant", "content": response_message.content})

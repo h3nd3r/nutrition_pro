@@ -35,10 +35,10 @@ goals and preferences.
 3. Check available ingredients:
 Ask what staple and fresh ingredients they have on hand. This could include pantry items, proteins, and fresh 
 produce. If they have zero or very limited ingredients on hand (less than 5), AND/OR if the user specified that they
-want more diversity in their ingredients, call the following API to get more ingredients to use: get_grocery_items(location_id).
+want more diversity in their ingredients, ask them where they want to get groceries from. 
 
-If the user asks you to use ingredients from Trader Joes, call the following
-API: traderjoes_items().
+- If they specify Trader Joes, call the following API: traderjoes_items().
+- If they specify their local grocery store, call the following API: get_grocery_items(location_id).
 
 If you don't know their zipcode, ask them for it before calling the get_grocery_items(location_id) API and call the following
 API to obtain the location_id of their nearest store: get_location_id(zipcode).
