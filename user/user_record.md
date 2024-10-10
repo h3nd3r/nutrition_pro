@@ -79,4 +79,8 @@
 - **Nutrition goal:** 2024-10-08. Client is evaluating if fettuccine Alfredo is a good meal to meet their goals.
 - **Preferences:** 2024-10-10. Client wants to get some diversity in their meals.
 - **Cuisines:** 2024-09-29. Client is interested in the Baked Chicken Thighs with Roasted Vegetables recipe.
+<<<<<<< Updated upstream
 - **Available Ingredients:** 2024-10-10. Client provided their zipcode (92104) to find local grocery store items.
+=======
+- **Available Ingredients:** 2024-10-10. Client is looking for meal suggestions based on the menu options available to them.
+>>>>>>> Stashed changes

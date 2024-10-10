@@ -48,26 +48,6 @@ def retrieve_children_page_ids():
         print(f"DEBUG: Error, failed to retrieve children page ids: {e}")
         raise Exception(f"Error: Failed to retrieve children page ids: {e}")
 
-# Retrieve a random page's content from the workspace
-@traceable
-def retrieve_random_page_content():
-    try:
-        children_page_ids = retrieve_children_page_ids()
-
-        if not children_page_ids:
-            print("DEBUG: No child pages found.")
-            return "Error: Failed to retrieve content for a random page."
-
-        random_page_id = random.choice(children_page_ids).get("page_id", '')
-        if random_page_id:
-            return retrieve_page_content(random_page_id)
-        else:
-            print("DEBUG: No random page id found.")
-            return f"Error: Failed to retrieve content for a random page."
-    except Exception as e:
-        print(f"DEBUG: Error in retrieve_random_page_content: {e}")
-        return f"Error: Failed to retrieve content for a random page."
-
 # Load pages from the workspace into a list[Document]
 # TODO: implement max_pages and pagination
 @traceable

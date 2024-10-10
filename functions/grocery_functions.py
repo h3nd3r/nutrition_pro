@@ -74,20 +74,6 @@ def get_grocery_items_request(location_id, num_items_limit):
 
 @traceable
 @observe()
-def get_grocery_items(location_id, num_items_limit=10):
-    try:
-        data = get_grocery_items_request(location_id, num_items_limit)
-        items = [item['description'] for item in data]
-        formatted_items = ", ".join(items)
-        print(f"Grocery items: {formatted_items}")
-        return f"Here are some grocery items you might want to buy: {formatted_items}"
-    except Exception as e:
-        print(f"Error: Failed to get grocery items: {e}")
-        return "Failed to get grocery items in the nearby grocery stores"
-
-
-@traceable
-@observe()
 # 50 is the max number of items that can be returned by the API unless we paginate
 def get_grocery_items_on_promotion(location_id, num_items_limit=50):
     try:

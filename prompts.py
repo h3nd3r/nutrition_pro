@@ -38,9 +38,7 @@ produce. If they have zero or very limited ingredients on hand (less than 5), AN
 want more diversity in their ingredients, ask them where they want to get groceries from. 
 
 - If they specify Trader Joes, call the following API: traderjoes_items().
-- If they specify their local grocery store, call the following API: get_grocery_items(location_id).
 
-If you don't know their zipcode, ask them for it before calling the get_grocery_items(location_id) API and call the following
 API to obtain the location_id of their nearest store: get_location_id(zipcode).
 
 4. If you got the ingredients from the API, let the user knows what ingredients you got from the API, and
@@ -88,11 +86,8 @@ A separate system monitors for these requests.
 
 The following is the list of functions you can call:
 - get_location_id(zipcode): call this with the client's zipcode to obtain the location id of their local grocery store.
-- get_grocery_items(location_id): call with the location id of the client's local grocery store to get more ingredients
-to use if the client has very limited ingredients in their pantry.
 - get_grocery_items_on_promotion(location_id): call with the location id of the client's local grocery store to get
 grocery items on promotion.
-- get_random_favorite_recipe(): call this to get a random favorite recipe from the client's Notion workspace.
 - get_favorite_recipes_from_message_history(): given the message history, suggest one or more favorite recipes that the user may want to consider.
 - traderjoes_items(): call this to get a list of items from trader joes.
 """

@@ -11,9 +11,8 @@ from langfuse import Langfuse
 from prompts import ASSESSMENT_PROMPT, SYSTEM_PROMPT
 from user_record import read_user_record, write_user_record, format_user_record, parse_user_record
 from rag_pipeline import RAGPipeline
-from functions.grocery_functions import get_grocery_items, get_location_id, get_grocery_items_on_promotion
+from functions.grocery_functions import get_location_id, get_grocery_items_on_promotion
 from functions.scraper_functions import traderjoes_items
-from functions.notion_reader import retrieve_random_page_content
 import re
 from langsmith.wrappers import wrap_openai
 from langsmith import traceable
@@ -224,15 +223,7 @@ async def on_message(message: cl.Message):
             # function_name = function_call["function_name"]
             # args = function_call["args"]
 
-            if function_name == "get_grocery_items":
-                print("calling get_grocery_items")
-                args_dict = json.loads(args)
-                location_id = args_dict.get('location_id', '')
-
-                print("DEBUG: location_id: ", location_id)
-
-                result = get_grocery_items(location_id)
-            elif function_name == "get_grocery_items_on_promotion":
+            if function_name == "get_grocery_items_on_promotion":
                 print("calling get_grocery_items_on_promotion")
                 args_dict = json.loads(args)
                 location_id = args_dict.get('location_id', '')
@@ -248,16 +239,16 @@ async def on_message(message: cl.Message):
                 print("DEBUG: zipcode: ", zipcode)
                 
                 result = get_location_id(zipcode)
-            elif function_name == "get_random_favorite_recipe":
-                print("calling get_random_favorite_recipe")
-                result = retrieve_random_page_content()
+
             elif function_name == "traderjoes_items":
                 print("calling traderjoes_items")
                 result = traderjoes_items()
+
             elif function_name == "get_favorite_recipes_from_message_history":
                 print("calling get_favorite_recipes_from_message_history")
                 #print("DEBUG: message_history in function call: ", message_history)
                 result = rag_pipeline.query_user_favorite_recipes(message_history)
+
             else:
                 result = f"Unknown function '{function_name}' cannot be called"
 

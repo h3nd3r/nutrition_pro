@@ -2,24 +2,6 @@ TOOLS = [
     {
         "type": "function",
         "function": {
-            "name": "get_grocery_items",
-            "description": "Get the grocery items for the client's local grocery store, as specified by the location id. Call this to get more ingredients if the client has very limited ingredients in their pantry.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "location_id": {
-                        "type": "string",
-                        "description": "The location id of the client's local grocery store.",
-                    },
-                },
-                "required": ["location_id"],
-                "additionalProperties": False,
-            },
-        }
-    },
-    {
-        "type": "function",
-        "function": {
             "name": "get_grocery_items_on_promotion",
             "description": "Call this to get the grocery items on promotion at client's local grocery store, as specified by the location id.",
             "parameters": {
@@ -49,19 +31,6 @@ TOOLS = [
                     },
                 },
                 "required": ["zipcode"],
-                "additionalProperties": False,
-            },
-        }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "get_random_favorite_recipe",
-            "description": "Call this if user asks to get a random favorite recipe from the client's Notion workspace, or to surprise them with a recipe.",
-            "parameters": {
-                "type": "object",
-                "properties": {},
-                "required": [],
                 "additionalProperties": False,
             },
         }
