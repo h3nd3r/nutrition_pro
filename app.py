@@ -17,6 +17,8 @@ from functions.notion_reader import retrieve_random_page_content
 import re
 from langsmith.wrappers import wrap_openai
 from langsmith import traceable
+from functions.tools import TOOLS
+
 # Load environment variables
 load_dotenv()
 
@@ -136,14 +138,44 @@ async def generate_response(client, message_history, gen_kwargs):
     await response_message.send()
 
     # Update here to check the response and call the API functions if needed
-    stream = await client.chat.completions.create(messages=message_history, stream=True, **gen_kwargs)
+    # stream = await client.chat.completions.create(messages=message_history, stream=True, **gen_kwargs)
+    stream = await client.chat.completions.create(
+        messages=message_history,
+        stream=True,
+        tools=TOOLS,
+        tool_choice="auto",
+        **gen_kwargs
+    )
+
+    functions_called = {} # dictionary in the form of {index: {function_name: arguments}}
+
     async for part in stream:
+        if part.choices[0].delta.tool_calls:
+            tool_call = part.choices[0].delta.tool_calls[0]
+
+            tool_call_index = tool_call.index
+            function_name_delta = tool_call.function.name or ""
+            arguments_delta = tool_call.function.arguments or ""
+            function_name = functions_called.get(tool_call_index, {}).get("function_name", "")
+            arguments = functions_called.get(tool_call_index, {}).get("arguments", "")
+            function_name += function_name_delta
+            arguments += arguments_delta
+
+            functions_called.update({
+                tool_call_index: {
+                    "function_name": function_name,
+                    "arguments": arguments
+                }
+            })
+
         if token := part.choices[0].delta.content or "":
             await response_message.stream_token(token)
 
     await response_message.update()
 
-    return response_message
+    print("Functions called: ", functions_called)
+
+    return response_message, functions_called
 
 @traceable
 @cl.on_message
@@ -180,7 +212,9 @@ async def on_message(message: cl.Message):
 
     asyncio.create_task(assess_message(message_history))
 
-    response_message = await generate_response(client, message_history, gen_kwargs)
+    response_message, functions_called = await generate_response(client, message_history, gen_kwargs)
+
+    print("Functions called in on_message: ", functions_called)
 
     function_call = extract_json(response_message.content)
     print(f"Extracting function from response: {function_call}")
@@ -204,8 +238,8 @@ async def on_message(message: cl.Message):
         elif function_name == "traderjoes_items":
             print("calling traderjoes_items")
             result = traderjoes_items()
-        elif function_name == "get_favorite_recipes":
-            print("calling get_favorite_recipes")
+        elif function_name == "get_favorite_recipes_from_message_history":
+            print("calling get_favorite_recipes_from_message_history")
             result = rag_pipeline.query_user_favorite_recipes(message_history)
         else:
             result = f"Unknown function '{function_name}' cannot be called"
@@ -214,7 +248,7 @@ async def on_message(message: cl.Message):
         message_history.append({"role": "system", "content": result})
 
         # Generate a new response incorporating the function results
-        response_message = await generate_response(client, message_history, gen_kwargs)
+        response_message, functions_called = await generate_response(client, message_history, gen_kwargs)
         function_call = extract_json(response_message.content)
 
     # Record the AI's response in the history
@@ -232,7 +266,7 @@ async def on_chat_start():
 
     rag_pipeline.index_user_favorite_recipes()
 
-    response_message = await generate_response(client, message_history, gen_kwargs)
+    response_message, functions_called = await generate_response(client, message_history, gen_kwargs)
 
     # Record the AI's response in the history
     message_history.append({"role": "assistant", "content": response_message.content})

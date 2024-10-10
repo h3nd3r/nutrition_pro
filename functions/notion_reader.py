@@ -3,13 +3,15 @@ from dotenv import load_dotenv
 from notion_client import Client
 from typing import List
 from llama_index.core.schema import Document
+from langsmith import traceable
 import random
-import pdb
+
 load_dotenv()
 
 notion = Client(auth=os.getenv("NOTION_API_KEY"))
 
 # Retrieve all children page IDs associated with the parent page
+@traceable
 def retrieve_children_page_ids():
     parent_id = os.getenv("NOTION_PARENT_PAGE_ID")
     print(f"DEBUG: parent_id: {parent_id}")
@@ -47,6 +49,7 @@ def retrieve_children_page_ids():
         raise Exception(f"Error: Failed to retrieve children page ids: {e}")
 
 # Retrieve a random page's content from the workspace
+@traceable
 def retrieve_random_page_content():
     try:
         children_page_ids = retrieve_children_page_ids()
@@ -67,6 +70,7 @@ def retrieve_random_page_content():
 
 # Load pages from the workspace into a list[Document]
 # TODO: implement max_pages and pagination
+@traceable
 def load_pages() -> List[Document]:
     try:
         children_page_ids = retrieve_children_page_ids()
@@ -88,6 +92,7 @@ def load_pages() -> List[Document]:
         return []
 
 # Retrieve page content associated with the page_id
+@traceable
 def retrieve_page_content(page_id):
     block_id = page_id # The page_id is also the id of the page's root block
     try:
