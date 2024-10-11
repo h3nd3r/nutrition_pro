@@ -14,7 +14,7 @@ notion = Client(auth=os.getenv("NOTION_API_KEY"))
 @traceable
 def retrieve_children_page_ids():
     parent_id = os.getenv("NOTION_PARENT_PAGE_ID")
-    print(f"DEBUG: parent_id: {parent_id}")
+    # print(f"DEBUG: parent_id: {parent_id}")
 
     try:
         # get all pages incl parent and children
@@ -42,7 +42,7 @@ def retrieve_children_page_ids():
                 }
                 children_page_ids.append(page_data)
 
-        print(f"DEBUG: children_page_ids: {children_page_ids}")
+        # print(f"DEBUG: children_page_ids: {children_page_ids}")
         return children_page_ids
     except Exception as e:
         print(f"DEBUG: Error, failed to retrieve children page ids: {e}")

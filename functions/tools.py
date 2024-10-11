@@ -2,6 +2,24 @@ TOOLS = [
     {
         "type": "function",
         "function": {
+            "name": "get_location_id",
+            "description": "If client asks to see grocery items on promotion, call this function to obtain the location id of the client's local grocery store. The location id is needed to call the get_grocery_items_on_promotion function.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "zipcode": {
+                        "type": "string",
+                        "description": "The zipcode to get the location id for.",
+                    },
+                },
+                "required": ["zipcode"],
+                "additionalProperties": False,
+            },
+        }
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "get_grocery_items_on_promotion",
             "description": "Call this to get the grocery items on promotion at client's local grocery store, as specified by the location id.",
             "parameters": {
@@ -13,24 +31,6 @@ TOOLS = [
                     },
                 },
                 "required": ["location_id"],
-                "additionalProperties": False,
-            },
-        }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "get_location_id",
-            "description": "Call this to get the location id of the client's local grocery store, as specified by the zipcode.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "zipcode": {
-                        "type": "string",
-                        "description": "The zipcode to get the location id for.",
-                    },
-                },
-                "required": ["zipcode"],
                 "additionalProperties": False,
             },
         }

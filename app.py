@@ -1,4 +1,3 @@
-import os
 import base64
 from dotenv import load_dotenv
 import chainlit as cl
@@ -13,7 +12,6 @@ from user_record import read_user_record, write_user_record, format_user_record,
 from rag_pipeline import RAGPipeline
 from functions.grocery_functions import get_location_id, get_grocery_items_on_promotion
 from functions.scraper_functions import traderjoes_items
-import re
 from langsmith.wrappers import wrap_openai
 from langsmith import traceable
 from functions.tools import TOOLS
@@ -26,8 +24,6 @@ config = MODEL_CONFIGURATIONS[CONFIG_KEY]
 
 langfuse = Langfuse()
 
-# Initialize the OpenAI async client
-#client = openai.AsyncClient(api_key=config["api_key"], base_url=config["endpoint_url"])
 client = wrap_openai(openai.AsyncClient(api_key=config["api_key"], base_url=config["endpoint_url"]))
 rag_pipeline = RAGPipeline()
 
@@ -75,13 +71,11 @@ async def assess_message(message_history):
         existing_meal_preferences=meal_preferences_str,
         existing_chat_records=chat_records_str,
         current_date=current_date
-    )    
-    # print("Filled prompt: \n\n", filled_prompt)
+    )
 
     response = await client.chat.completions.create(messages=[{"role": "system", "content": filled_prompt}], **gen_kwargs)
 
     assessment_output = response.choices[0].message.content.strip()
-    # print("Assessment Output: \n\n", assessment_output)
 
     # Parse the assessment output
     new_alerts, new_meal_preferences, chat_records_updates = parse_assessment_output(assessment_output)
@@ -114,22 +108,6 @@ def parse_assessment_output(output):
     except json.JSONDecodeError as e:
         print("Failed to parse assessment output:", e)
         return [], [], []
-
-@traceable
-def extract_json(content):
-    # Regular expression to find the JSON blob
-    match = re.search(r'\{.*\}', content, re.DOTALL)
-    if match:
-        json_str = match.group(0)  # Extract the matched JSON string
-        try:
-            # Attempt to parse the JSON to ensure it's valid
-            json_data = json.loads(json_str.strip())
-            return json_data  # Return the parsed JSON object
-        except json.JSONDecodeError:
-            print("Error: Extracted string is not valid JSON.")
-            return None  # Return None if JSON is invalid
-    print("No JSON blob found.")
-    return None  # Return None if no match is found
 
 @traceable
 async def generate_response(client, message_history, gen_kwargs):
@@ -210,34 +188,24 @@ async def on_message(message: cl.Message):
 
     response_message, functions_called = await generate_response(client, message_history, gen_kwargs)
 
-    #function_call = extract_json(response_message.content)
-    #print(f"Extracting function from response: {function_call}")
-    # while function_call and "function_name" in function_call and "args" in function_call:
-
     while functions_called: # handle one function call after another without new user message
         for _, tool_call_info in functions_called.items(): # handle multiple functions being returned in tool_calls
             function_name = tool_call_info.get("function_name", "")
             args = tool_call_info.get("arguments", "")
-
-            print("in function_call if block")
-            # function_name = function_call["function_name"]
-            # args = function_call["args"]
+            print(f"DEBUG: in function_called for loop, function_name: {function_name}, args: {args}")
 
             if function_name == "get_grocery_items_on_promotion":
                 print("calling get_grocery_items_on_promotion")
                 args_dict = json.loads(args)
                 location_id = args_dict.get('location_id', '')
-                
                 print("DEBUG: location_id: ", location_id)
-                
                 result = get_grocery_items_on_promotion(location_id)
+
             elif function_name == "get_location_id":
-                print("calling get_location")
+                print("calling get_location_id")
                 args_dict = json.loads(args)
                 zipcode = args_dict.get('zipcode', '')
-                
                 print("DEBUG: zipcode: ", zipcode)
-                
                 result = get_location_id(zipcode)
 
             elif function_name == "traderjoes_items":
@@ -246,7 +214,6 @@ async def on_message(message: cl.Message):
 
             elif function_name == "get_favorite_recipes_from_message_history":
                 print("calling get_favorite_recipes_from_message_history")
-                #print("DEBUG: message_history in function call: ", message_history)
                 result = rag_pipeline.query_user_favorite_recipes(message_history)
 
             else:
@@ -260,9 +227,6 @@ async def on_message(message: cl.Message):
 
             # Generate a new response incorporating the function results
             response_message, functions_called = await generate_response(client, message_history, gen_kwargs)
-            # should we update message history with response message here?
-
-            # function_call = extract_json(response_message.content)
 
     # Record the AI's response in the history
     message_history.append({"role": "assistant", "content": response_message.content})
@@ -279,7 +243,7 @@ async def on_chat_start():
 
     rag_pipeline.index_user_favorite_recipes()
 
-    response_message, functions_called = await generate_response(client, message_history, gen_kwargs)
+    response_message,_ = await generate_response(client, message_history, gen_kwargs)
 
     # Record the AI's response in the history
     message_history.append({"role": "assistant", "content": response_message.content})
