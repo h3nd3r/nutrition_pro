@@ -5,6 +5,7 @@ import pdb
 
 def scrape_react_page(url):
     with sync_playwright() as p:
+
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
         page.goto(url)
@@ -18,7 +19,6 @@ def scrape_react_page(url):
             file_contents = file.read()
         page.set_content(file_contents)
         '''
-        
         # Wait for a specific element that indicates the React app has loaded
         page.wait_for_selector('.ProductCard_card__title__text__uiWLe')
 
@@ -37,13 +37,13 @@ def scrape_react_page(url):
             link = "https://www.traderjoes.com" + element.query_selector('.Link_link__1AZfr').get_attribute('href')
             data.append({"title": title, "link": link})
         browser.close()
-        json_array = json.dumps(data)
-        return json_array
+        #json_array = json.dumps(data)
+        return data
 
 # Usage
 url = "https://www.traderjoes.com/home/products/category/food-8"
 scraped_data = scrape_react_page(url)
 
-with open('data/traderjoes_items.json', 'w', encoding='utf-8') as json_file:
+with open('traderjoes_items.json', 'w', encoding='utf-8') as json_file:
     json.dump(scraped_data, json_file, ensure_ascii=False, indent=4)  # indent for pretty printing
 #print(scraped_data)
