@@ -2,12 +2,13 @@
 
 ## Client Information
 
-## Alerts
-- **2024-10-10:** Client is following the nutrition plan and is ready to proceed with the recommended recipe.
+## Dinner Log
+- **2024-10-12:** 2024-10-10: Client ate a whole chocolate cake for dinner.
+- **2024-10-12:** 2024-10-11: Client ate a whole chocolate cake for dinner.
+- **2024-10-12:** 2024-10-12: Client had salmon, potatoes, and broccoli for dinner.
 
 ## Meal Preferences
-- **2024-10-10:** Client has frozen tilapia, spinach, and brown rice on hand and may be interested in recipes using these ingredients.
-- **2024-10-10:** Client has frozen pork cutlets on hand and may be interested in recipes using this ingredient.
+_No meal preferences yet._
 
 ## Chat Records
-- **Seasonings:** 2024-10-10. Client is interested in recommendations for seasonings.
+- **Cooking:** 2024-10-12. Client mentions they will go to Trader Joe's to get some ingredients for cooking.
