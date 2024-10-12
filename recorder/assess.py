@@ -37,8 +37,6 @@ async def assess_message(latest_message, filtered_history):
     markdown_content = read_user_record(file_path)
     parsed_record = parse_user_record(markdown_content)
 
-
-
     # Convert message history, dinner log, meal preferences, and chat records to strings
     history_str = json.dumps(filtered_history, indent=4)
     dinner_log_str = json.dumps(parsed_record.get("Dinner Log", []), indent=4)

@@ -8,8 +8,6 @@ from config import MODEL_CONFIGURATIONS, CONFIG_KEY
 from datetime import datetime
 from langfuse import Langfuse
 from prompts import SYSTEM_PROMPT
-#from recorder.recorder_prompt import RECORDER_PROMPT
-#from recorder.user_record import read_user_record, write_user_record, format_user_record, parse_user_record
 from rag_pipeline import RAGPipeline
 from functions.grocery_functions import get_location_id, get_grocery_items_on_promotion
 from functions.scraper_functions import traderjoes_items
