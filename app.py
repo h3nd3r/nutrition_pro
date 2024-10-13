@@ -178,8 +178,10 @@ async def on_chat_start():
     print("A new chat session has started!")
     message_history = cl.user_session.get("message_history", [])
 
+    user_info = rag_pipeline.get_user_info()
     user_rag_data = rag_pipeline.retrieve_user_rag_data()
-    message_history.insert(0, {"role": "system", "content": SYSTEM_PROMPT + user_rag_data})
+    message_history.insert(0, {"role": "system", "content": SYSTEM_PROMPT + user_info + user_rag_data})
+    # print(f"DEBUG: user_info: {user_info}")
 
     rag_pipeline.index_user_favorite_recipes()
 

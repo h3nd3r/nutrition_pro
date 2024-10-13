@@ -1,3 +1,4 @@
+import os
 from langfuse import Langfuse
 from langfuse.llama_index import LlamaIndexCallbackHandler
 from dotenv import load_dotenv
@@ -8,6 +9,8 @@ from functions.notion_reader import load_pages
 
 load_dotenv()
 
+user_info_file_path = "user/user_info.md"
+
 class RAGPipeline:
 
     recipes_index = None
@@ -15,6 +18,22 @@ class RAGPipeline:
     def __init__(self):
         langfuse_callback_handler = LlamaIndexCallbackHandler()
         Settings.callback_manager = CallbackManager([langfuse_callback_handler])
+
+    def get_user_info(self):
+        formatted_user_info = ""
+
+        # read user info from user/user_info.md
+        if not os.path.exists(user_info_file_path):
+            print(f"File {user_info_file_path} does not exist")
+            formatted_user_info = "CONTEXT: No user personal information found"
+        else:
+            with open(user_info_file_path, "r") as file:
+                user_info = file.read()
+                formatted_user_info = f"""
+                CONTEXT: This is the user's personal information: \n{user_info}.
+                """
+
+        return formatted_user_info
 
     def retrieve_user_rag_data(self):
         # Load documents from a directory
