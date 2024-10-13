@@ -46,8 +46,8 @@ class RAGPipeline:
         query_engine = index.as_query_engine()
 
         meal_preferences_query_str = """
-            Provide a summary of any relevant information from the user's previous interactions with
-            the system with regards to their meal preferences.
+            Provide a summary of the user's meal preferences based on the user's previous interactions
+            with the system, as specified in the Meal Preferences section of the user's record.
         """
 
         response = query_engine.query(meal_preferences_query_str)
@@ -55,8 +55,11 @@ class RAGPipeline:
         user_meal_preferences_summary = response.response
 
         ingredients_list_query_str = """
-            Provide a comprehensive list of ingredients that the user has available to them as well as any
-            ingredients they may be out of or missing.
+            Provide a comprehensive list of ingredients that the user has available to them, taking into account
+            any ingredients they may be out of or missing.
+
+            For example: if user mentioned they have steak in the prior conversation, but they are out of steak now,
+            then the ingredients list should reflect that the user is out of steak.
         """
 
         response = query_engine.query(ingredients_list_query_str)
