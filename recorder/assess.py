@@ -41,8 +41,8 @@ async def assess_message(latest_message, filtered_history):
     history_str = json.dumps(filtered_history, indent=4)
     dinner_log_str = json.dumps(parsed_record.get("Dinner Log", []), indent=4)
     meal_preferences_str = json.dumps(parsed_record.get("Meal Preferences", []), indent=4)
-    chat_records_str = json.dumps(parsed_record.get("Chat Records", {}), indent=4)
-    
+    ingredients_list_str = json.dumps(parsed_record.get("Available Ingredients List", []), indent=4)
+
     current_date = datetime.now().strftime('%Y-%m-%d')
 
     # Generate the assessment prompt for the recorder
@@ -51,7 +51,7 @@ async def assess_message(latest_message, filtered_history):
         history=history_str,
         existing_dinner_log=dinner_log_str,
         existing_meal_preferences=meal_preferences_str,
-        existing_chat_records=chat_records_str,
+        existing_ingredients_list=ingredients_list_str,
         current_date=current_date
     )
 
@@ -60,22 +60,19 @@ async def assess_message(latest_message, filtered_history):
     assessment_output = response.choices[0].message.content.strip()
 
     # Parse the assessment output
-    dinner_log_updates, meal_preferences_updates, chat_records_updates = parse_assessment_output(assessment_output)
+    dinner_log_updates, meal_preferences_updates, ingredients_list_updates = parse_assessment_output(assessment_output)
 
     # Update the user record with the new dinner log updates, meal preferences updates and chat records updates
     parsed_record["Dinner Log"].extend(dinner_log_updates)
     parsed_record["Meal Preferences"].extend(meal_preferences_updates)
-    for update in chat_records_updates:
-        topic = update["topic"]
-        note = update["note"]
-        parsed_record["Chat Records"][topic] = note
+    parsed_record["Available Ingredients List"].extend(ingredients_list_updates)
 
     # Format the updated record and write it back to the file
     updated_content = format_user_record(
         parsed_record["Client Information"],
         parsed_record["Dinner Log"],
         parsed_record["Meal Preferences"],
-        parsed_record["Chat Records"]
+        parsed_record["Available Ingredients List"]
     )
     write_user_record(file_path, updated_content)
 
@@ -85,8 +82,8 @@ def parse_assessment_output(output):
         parsed_output = json.loads(output)
         dinner_log_updates = parsed_output.get("dinner_log_updates", [])
         meal_preferences_updates = parsed_output.get("meal_preferences_updates", [])
-        chat_records_updates = parsed_output.get("chat_records_updates", [])
-        return dinner_log_updates, meal_preferences_updates, chat_records_updates
+        ingredients_list_updates = parsed_output.get("ingredients_list_updates", [])
+        return dinner_log_updates, meal_preferences_updates, ingredients_list_updates
     except json.JSONDecodeError as e:
         print("Failed to parse assessment output:", e)
         return [], [], []

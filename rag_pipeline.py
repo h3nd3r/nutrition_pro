@@ -45,19 +45,31 @@ class RAGPipeline:
         # Create a query engine
         query_engine = index.as_query_engine()
 
-        query_str = """
+        meal_preferences_query_str = """
             Provide a summary of any relevant information from the user's previous interactions with
             the system with regards to their meal preferences.
         """
 
-        response = query_engine.query(query_str)
+        response = query_engine.query(meal_preferences_query_str)
         print(f"response.response meal preferences: {response.response}")
         user_meal_preferences_summary = response.response
 
+        ingredients_list_query_str = """
+            Provide a comprehensive list of ingredients that the user has available to them as well as any
+            ingredients they may be out of or missing.
+        """
+
+        response = query_engine.query(ingredients_list_query_str)
+        print(f"response.response ingredients list: {response.response}")
+        user_ingredients_list_summary = response.response
+
         formatted_response = f"""
-        CONTEXT: This is the user's information as provided by the RAG pipeline: {user_meal_preferences_summary}.
+        CONTEXT: This is the user's information as provided by the RAG pipeline:
+        - User meal preferences: {user_meal_preferences_summary}.
+        - User ingredients list: {user_ingredients_list_summary}.
         You should use this information as additional context when responding to the user's query.
         """
+        print(f"DEBUG: formatted_response from retrieve_user_rag_data: {formatted_response}")
         return formatted_response
 
     def index_user_favorite_recipes(self):

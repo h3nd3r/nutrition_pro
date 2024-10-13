@@ -11,5 +11,5 @@
 ## Meal Preferences
 _No meal preferences yet._
 
-## Chat Records
-- **Cooking:** 2024-10-12. Client mentions they will go to Trader Joe's to get some ingredients for cooking.
+## Available Ingredients List
+_No ingredients list yet._

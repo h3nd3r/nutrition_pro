@@ -19,10 +19,8 @@ _No dinners recorded yet._
 ## Meal Preferences
 _No meal preferences yet._
 
-## Chat Records
-- **Nutrition goal:** Not specified
-- **Preferences:** Not specified
-- **Cuisines:** Not specified
+## Available Ingredients List
+_No ingredients list yet._
 """
         with open(file_path, "w") as file:
             file.write(default_content)
@@ -37,11 +35,11 @@ def write_user_record(file_path, content):
         file.write(content)
 
 @observe()
-def format_user_record(user_info, dinner_log, meal_preferences, chat_records):
+def format_user_record(user_info, dinner_log, meal_preferences, ingredients_list):
     record = "# Client Record\n\n## Client Information\n"
     for key, value in user_info.items():
         record += f"**{key}:** {value}\n"
-    
+
     record += "\n## Dinner Log\n"
     if dinner_log:
         for dinner in dinner_log:
@@ -55,11 +53,14 @@ def format_user_record(user_info, dinner_log, meal_preferences, chat_records):
             record += f"- **{preference['date']}:** {preference['note']}\n"
     else:
         record += "_No meal preferences yet._\n"
-    
-    record += "\n## Chat Records\n"
-    for key, value in chat_records.items():
-        record += f"- **{key}:** {value}\n"
-    
+
+    record += "\n## Available Ingredients List\n"
+    if ingredients_list:
+        for ingredient in ingredients_list:
+            record += f"- **{ingredient['date']}:** {ingredient['note']}\n"
+    else:
+        record += "_No ingredients list yet._\n"
+
     return record
 
 @observe()
@@ -67,7 +68,7 @@ def parse_user_record(markdown_content):
     user_info = {}
     dinner_log = []
     meal_preferences = []
-    chat_records = {}
+    ingredients_list = []
     
     current_section = None
     lines = markdown_content.split("\n")
@@ -100,18 +101,21 @@ def parse_user_record(markdown_content):
                     date = date.strip("- **").strip()
                     note = note.strip()
                     meal_preferences.append({"date": date, "note": note})
-        elif current_section == "Chat Records" and line.startswith("- **"):
-            if ":** " in line:
-                key, value = line.split(":** ", 1)
-                key = key.strip("- **").strip()
-                value = value.strip()
-                chat_records[key] = value
+        elif current_section == "Available Ingredients List":
+            if "_No ingredients list yet._" in line:
+                ingredients_list = []
+            elif line.startswith("- **"):
+                if ":** " in line:
+                    date, note = line.split(":** ", 1)
+                    date = date.strip("- **").strip()
+                    note = note.strip()
+                    ingredients_list.append({"date": date, "note": note})
     
     final_record = {
         "Client Information": user_info,
         "Dinner Log": dinner_log,
         "Meal Preferences": meal_preferences,
-        "Chat Records": chat_records
+        "Available Ingredients List": ingredients_list
     }
-    #print(f"Final parsed record: {final_record}")
+    print(f"Final parsed user_record: {final_record}")
     return final_record
