@@ -61,5 +61,21 @@ TOOLS = [
             },
         }
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_user_nutritional_goals_performance",
+            "description": "Call this if the user asks for feedback on how they're doing on their nutritional goals.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "num_days": {
+                        "type": "string",
+                        "description": "The number of days to get the user's nutritional goals performance for.",
+                    },
+                },
+                "additionalProperties": False,
+            },
+        }
+    },
 ]
-

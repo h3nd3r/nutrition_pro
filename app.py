@@ -156,6 +156,12 @@ async def on_message(message: cl.Message):
                 print("calling get_favorite_recipes_from_message_history")
                 result = rag_pipeline.query_user_favorite_recipes(message_history)
 
+            elif function_name == "get_user_nutritional_goals_performance":
+                print("calling get_user_nutritional_goals_performance")
+                args_dict = json.loads(args)
+                num_days = args_dict.get('num_days', '7')
+                print("DEBUG: num_days: ", num_days)
+                result = rag_pipeline.query_user_nutritional_goals_performance(message_history, num_days)
             else:
                 result = f"Unknown function '{function_name}' cannot be called"
 
