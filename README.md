@@ -1,15 +1,21 @@
 # NutritionPro aka "What's For Dinner?" Chat Application
 
-This Chainlit-based application serves as an nutrional assistant, leveraging various large language models (LLMs) to provide support in recommending nutritionous suggestions for what to eat for dinner. It includes features uesr_info input, tracking past conversations, and adaptive responses.
+This Chainlit-based application serves as a personal nutritional assistant, leveraging large language models (LLMs) to 
+provide support in recommending nutritious suggestions for what to eat for dinner. It includes features such as user_info 
+input, tracking past conversations, and adaptive responses.
 
 ## Features
 
-- **Single Model Support**: Uses OpenAI's GPT-4 model.
-- **User Assessment**: Automatically assesses interactions and updates a record for the user.
-- **Knowledge Tracking**: Maintains and updates a knowledge base for each user.
+- **Record Tracking and Ingestion**: Automatically assesses interactions and updates a record for the user, specifically
+dinner log, meal preferences, and available ingredients list. This, in turns, feeds into the RAG pipeline to provide
+additional context to the LLM.
 - **Adaptive Responses**: Uses conversation history and user records to provide context-aware responses.
 - **Streamed Responses**: Delivers model responses in real-time as they are generated.
-- **Configurable System Prompts**: Allows enabling/disabling of system prompts and user context.
+- **Image Ingestion**: Supports image ingestion as another user input to the LLM. This allows user to upload images, such as
+their pantry/fridge items, restaurant menu items, or a photo of their dinner plate.
+- **Trader Joe's Ingredients**: Utilized web scraping to fetch ingredients from Trader Joes' website.
+- **Notion Integration**: Utilizes Notion API to fetch favorite recipes from user's account.
+- **Kroger Integration**: Utilizes Kroger API to get a list of items on promo from their local Kroger affiliated grocery store.
 
 ## Prerequisites
 
